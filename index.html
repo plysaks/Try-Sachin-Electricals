@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarthi Enterprises - Powering Your Projects</title>
+    <meta name="description" content="Search our extensive catalog of high-quality industrial and commercial electrical equipment from Sarthi Enterprises.">
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Your Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <a href="#" class="logo"><i class="fas fa-bolt"></i> TrySarthi</a>
+            <nav>
+                <div class="hamburger" id="hamburger-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul id="nav-ul">
+                    <li><a href="#products">Products</a></li>
+                    <li><a href="#about">Why Us</a></li>
+                    <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6WsJ2WwG1Sf-zGlztKWA1V-vpg/viewform?usp=pp_url" target="_blank">Request Quote</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero">
+            <div class="hero-content">
+                <h1>Find the Right Component, Right Now</h1>
+                <p>Search our extensive inventory of high-quality electrical equipment.</p>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-bar" placeholder="Search by product name, type, or category...">
+                </div>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6WsJ2WwG1Sf-zGlztKWA1V-vpg/viewform?usp=pp_url" target="_blank" class="cta-button">Get a Free Quote</a>
+            </div>
+        </section>
+        
+        <!-- Products Section -->
+        <section id="products" class="fade-in">
+            <div class="container">
+                <h2>Our Product Catalog</h2>
+                <div id="product-filters" class="product-filters"></div>
+                <div id="product-grid-container" class="product-grid">
+                    <p class="no-results">Loading products...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Section -->
+        <section id="about" class="fade-in">
+             <div class="container">
+                <h2>Why Choose Us?</h2>
+                <div class="about-grid">
+                    <div class="about-item">
+                        <i class="fas fa-award"></i>
+                        <h3>Quality Assurance</h3>
+                        <p>Every product is rigorously tested to meet the highest industry standards for safety and reliability.</p>
+                    </div>
+                    <div class="about-item">
+                        <i class="fas fa-headset"></i>
+                        <h3>Expert Support</h3>
+                        <p>Our experienced team is ready to provide technical advice and help you find the perfect solution.</p>
+                    </div>
+                    <div class="about-item">
+                        <i class="fas fa-shipping-fast"></i>
+                        <h3>Fast Delivery</h3>
+                        <p>We maintain a large inventory to ensure your orders are processed and shipped without delay.</p>
+                    </div>
+                </div>
+             </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 Sarthi Enterprises. All Rights Reserved.</p>
+            <div class="social-links">
+                <a href="https://www.instagram.com/try.e.sarthin/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="https://wa.me/917973039131" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+            
+            <!-- NEW: Added Contact Info Section -->
+            <div class="contact-info">
+                <a href="tel:+917973039131" aria-label="Call our mobile number">
+                    <i class="fas fa-mobile-alt"></i> 79730 39131
+                </a>
+                <a href="tel:+911817960870" aria-label="Call our landline number">
+                    <i class="fas fa-phone-alt"></i> (0181) 7960870
+                </a>
+            </div>
+            
+        </div>
+    </footer>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <!-- Your main script file -->
+    <script src="script.js"></script>
+
+</body>
+</html>

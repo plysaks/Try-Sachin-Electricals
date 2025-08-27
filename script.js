@@ -3,7 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====================================================================================
     // 1. CONFIGURATION: Your Live Data Source
     // ====================================================================================
-    const productDataURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTxA4MxrHfTjIYD2BJkScvIraODKE2jjQAUEH1XIai11C04yzwT6coOvS5PdOuYyyWUBY3fhuCELNqd/pub?gid=0&single=true&output=csv';
+    // MODIFIED: Replaced the old URL with the new one for the product catalog.
+    const productDataURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTH-7zq9uBbhmgXFAjr1zYskABxAeXBZWjBYRKswuvbRyhdxx3D8Z0I9VB7FyFFPtf3QUZ8aYh0mw-G/pub?output=csv';
 
     // Get references to HTML elements
     const productGridContainer = document.getElementById('product-grid-container');

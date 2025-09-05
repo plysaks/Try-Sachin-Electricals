@@ -1,4 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // ====================================================================================
+    // Google AdSense Integration
+    // MODIFIED: Added Google AdSense script dynamically.
+    // ====================================================================================
+    const adsenseScript = document.createElement('script');
+    adsenseScript.async = true;
+    adsenseScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7077859622491715";
+    adsenseScript.crossOrigin = "anonymous";
+    document.head.appendChild(adsenseScript);
+
 
     // ====================================================================================
     // 1. CONFIGURATION: Your Live Data Source

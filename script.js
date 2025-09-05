@@ -1,14 +1,10 @@
 document.addEventListener('DOMContentLoaded', function() {
     // ====================================================================================
-    // Google AdSense Integration
-    // MODIFIED: Added Google AdSense script dynamically.
+    // NOTE: Google AdSense script injection has been REMOVED from here.
+    // The meta tag for verification should be placed directly in the HTML <head>.
+    // If you intend to display ads, you will need to add the ad unit code
+    // where you want the ads to appear, _after_ verification.
     // ====================================================================================
-    const adsenseScript = document.createElement('script');
-    adsenseScript.async = true;
-    adsenseScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7077859622491715";
-    adsenseScript.crossOrigin = "anonymous";
-    document.head.appendChild(adsenseScript);
-
 
     // ====================================================================================
     // 1. CONFIGURATION: Your Live Data Source

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SACHIN ELECTRICALS - Powering Your Projects</title>
-    <meta name="description" content="Search our extensive catalog of high-quality industrial and commercial electrical equipment from SACHIN ELECTRICALS. Get an instant estimation for your needs.">
+    <title>SACHIN ELECTRICALS - Product Estimator</title> <!-- Updated Title to reflect focus -->
+    <meta name="description" content="Select electrical equipment, get instant price estimations, and request a final quote from SACHIN ELECTRICALS. Search and filter products directly on our homepage."> <!-- Updated description -->
     
     <!-- Google AdSense Site Verification Meta Tag - PLACE THIS DIRECTLY IN THE HEAD -->
     <meta name="google-adsense-account" content="ca-pub-7077859622491715">
@@ -20,76 +20,45 @@
 
     <header>
         <div class="container">
-            <a href="https://www.google.com/maps/place/73%2F10,+near+Partap+Bagh+Welfare+Society,+Partap+Bagh,+Fentonganj,+Jalandhar,+Punjab+144001/@31.3309034,75.5837185,19z/data=!4m9!1m2!2m1!1sPartap+Bagh!3m5!1s0x391a5a5d69b953ef:0x5cbf61df498a1983!8m2!3d31.3309239!4d75.5843197!16s%2Fg%2F11sv5f3vbx!5m1!1e4?entry=ttu&g_ep=EgoyMDI1MDgyNC4wIKXMDSoASAFQAw%3D%3D" class="logo" target="_blank"><i class="fas fa-bolt"></i> SACHIN ELECTRICALS</a>
+            <!-- Logo links to top of the page (which is now the estimator) -->
+            <a href="#" class="logo" onclick="window.scrollTo(0, 0); return false;"><i class="fas fa-bolt"></i> SACHIN ELECTRICALS</a>
             <nav>
                 <div class="hamburger" id="hamburger-menu">
                     <i class="fas fa-bars"></i>
                 </div>
                 <ul id="nav-ul">
-                    <li><a href="#products">Products</a></li>
-                    <li><a href="#about">Why Us</a></li>
-                    <li><a href="#quote-estimation">Get Quote</a></li> <!-- Updated link -->
+                    <!-- Simplified navigation as all content is on one page/section -->
+                    <li><a href="#hero">Start Estimating</a></li> 
                 </ul>
             </nav>
         </div>
     </header>
 
     <main>
+        <!-- The entire content is now a unified hero/estimation section -->
         <section id="hero">
             <div class="hero-content">
                 <h1>Find the Right Component, Right Now</h1>
-                <p>Search our extensive inventory of high-quality electrical equipment.</p>
+                <p>Search our extensive inventory of high-quality electrical equipment and generate your instant estimation below.</p>
+                
+                <!-- Search Bar (now for filtering the estimator products) -->
                 <div class="search-container">
                     <i class="fas fa-search"></i>
                     <input type="text" id="search-bar" placeholder="Search by product name, type, or category...">
                 </div>
-                <a href="#quote-estimation" class="cta-button">Get a Free Quote</a> <!-- Updated link -->
-            </div>
-        </section>
-        
-        <section id="products" class="fade-in">
-            <div class="container">
-                <h2>Our Product Catalog</h2>
-                <div id="product-filters" class="product-filters"></div>
-                <div id="product-grid-container" class="product-grid">
-                    <p class="no-results">Loading products...</p>
+
+                <!-- Product Filters (now for filtering the estimator products) -->
+                <div id="product-filters" class="product-filters">
+                    <p class="no-results">Loading filters...</p>
+                    <!-- Filter buttons will be dynamically generated here by JS -->
                 </div>
-            </div>
-        </section>
 
-        <section id="about" class="fade-in">
-             <div class="container">
-                <h2>Why Choose Us?</h2>
-                <div class="about-grid">
-                    <div class="about-item">
-                        <i class="fas fa-award"></i>
-                        <h3>Quality Assurance</h3>
-                        <p>Every product is rigorously tested to meet the highest industry standards for safety and reliability.</p>
-                    </div>
-                    <div class="about-item">
-                        <i class="fas fa-headset"></i>
-                        <h3>Expert Support</h3>
-                        <p>Our experienced team is ready to provide technical advice and help you find the perfect solution.</p>
-                    </div>
-                    <div class="about-item">
-                        <i class="fas fa-shipping-fast"></i>
-                        <h3>Fast Delivery</h3>
-                        <p>We maintain a large inventory to ensure your orders are processed and shipped without delay.</p>
-                    </div>
-                </div>
-             </div>
-        </section>
-
-        <!-- START: Combined Quote Estimation Section -->
-        <section id="quote-estimation" class="fade-in">
-            <div class="container">
-                <h2>Generate Your Estimation</h2>
-                <p class="section-description">Select the products you need and specify quantities to get an instant quote.</p>
-
+                <!-- Product Grid for Estimation (renamed to reflect its purpose) -->
                 <div id="quote-product-grid" class="product-grid">
                     <p class="no-results">Loading products for estimation...</p>
                 </div>
 
+                <!-- Quote Summary Section -->
                 <div id="quote-summary">
                     <h3>Your Estimation Summary</h3>
                     <div id="total-amount">Total Estimated Amount: ₹0.00</div>
@@ -98,7 +67,6 @@
                 </div>
             </div>
         </section>
-        <!-- END: Combined Quote Estimation Section -->
 
     </main>
 
@@ -123,8 +91,7 @@
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    
-    <script src="script.js"></script> <!-- Now this file contains all JS logic -->
+    <script src="script.js"></script>
 
 </body>
 </html>

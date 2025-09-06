@@ -7,24 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====================================================================================
 
     // ====================================================================================
-    // 1. CONFIGURATION: Your Live Data Source & Google Form IDs
+    // 1. CONFIGURATION: Your Live Data Source & Google Form Base URL
     // ====================================================================================
     const productDataURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTH-7zq9uBbhmgXFAjr1zYskABxAeXBZWjBYRKswuvbRyhdxx3D8Z0I9VB7FyFFPtf3QUZ8aYh0mw-G/pub?output=csv';
 
-    // CONFIGURATION: Google Form Field IDs (YOU MUST UPDATE THESE)
-    // Use the "Get pre-filled link" feature on your Google Form to find these IDs.
+    // Google Form Link for "Contact for Final Quote" button (no pre-filling for this button)
     const GOOGLE_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6WsJ2WwG1Sf-zGlztKWA1V-vpg/viewform';
-    const GOOGLE_FORM_ENTRY_ID_PRODUCTS = 'entry.123456789'; // Placeholder: Replace with your Google Form field ID for the list of products
-    const GOOGLE_FORM_ENTRY_ID_TOTAL = 'entry.987654321';   // Placeholder: Replace with your Google Form field ID for the total amount
 
 
-    // Get references to HTML elements (main site)
-    const productGridContainer = document.getElementById('product-grid-container');
+    // Get references to HTML elements (all now within the unified hero/estimator section)
+    const quoteProductGrid = document.getElementById('quote-product-grid'); 
     const productFiltersContainer = document.getElementById('product-filters');
-    const searchBar = document.getElementById('search-bar');
-    
-    // Get references to HTML elements (quote estimation section)
-    const quoteProductGrid = document.getElementById('quote-product-grid');
+    const searchBar = document.getElementById('search-bar'); // This is the main search input now
     const totalAmountDisplay = document.getElementById('total-amount');
     const printQuoteButton = document.getElementById('print-quote');
     const contactForQuoteButton = document.getElementById('contact-for-quote-button');
@@ -34,108 +28,54 @@ document.addEventListener('DOMContentLoaded', function() {
     const navUl = document.getElementById('nav-ul');
     const faders = document.querySelectorAll('.fade-in'); // For initial fade-in animation
 
-    let allProducts = []; // Stores all loaded products
+    let quotableProducts = [];    // Stores ALL loaded products suitable for estimation (with rates)
     let selectedProducts = {}; // Stores {productId: {product, quantity}} for the quote estimator
-
+    let currentActiveCategory = 'All'; // To keep track of the currently active filter
 
     // ====================================================================================
-    // 2. DATA LOADING
+    // 2. DATA LOADING & INITIALIZATION
     // ====================================================================================
-    async function loadAllProductsAndInitialize() {
+    async function loadAllDataAndInitialize() {
         try {
             Papa.parse(productDataURL, {
                 download: true, header: true, dynamicTyping: true,
                 complete: function(results) {
                     console.log("Data loaded successfully.");
-                    // Filter out products without a name, assign unique IDs
-                    allProducts = results.data.filter(p => p.name && p.name.trim() !== "");
-                    allProducts.forEach((p, index) => {
+                    // Filter out products without a name or a valid rate, assign unique IDs
+                    quotableProducts = results.data.filter(p => p.name && p.name.trim() !== "" && typeof p.rate === 'number' && p.rate > 0);
+                    quotableProducts.forEach((p, index) => {
                         if (!p.id) p.id = `product-${index}`;
                     });
 
-                    // Initialize main product catalog if elements exist
-                    if (productGridContainer && productFiltersContainer) {
-                        if (allProducts.length === 0) {
-                            productGridContainer.innerHTML = '<p class="no-results">No products found. Please check the data source.</p>';
-                        } else {
-                            setupFilters();
-                            displayProducts(allProducts);
-                        }
+                    if (quotableProducts.length === 0) {
+                        if (quoteProductGrid) quoteProductGrid.innerHTML = '<p class="no-results">No products with rates available for estimation. Please ensure your Google Sheet has a "rate" column with positive numbers.</p>';
+                        if (productFiltersContainer) productFiltersContainer.innerHTML = '<p class="no-results">No categories available.</p>';
+                        return;
                     }
 
-                    // Initialize quote estimation section if elements exist
-                    if (quoteProductGrid && totalAmountDisplay) {
-                        const productsWithRates = allProducts.filter(p => typeof p.rate === 'number' && p.rate > 0);
-                        if (productsWithRates.length === 0) {
-                            quoteProductGrid.innerHTML = '<p class="no-results">No products with rates available for estimation. Please ensure your Google Sheet has a "rate" column with positive numbers.</p>';
-                        } else {
-                            displayProductsForQuote(productsWithRates);
-                            attachQuoteEventListeners();
-                            updateTotalAmount(); // Initial update for quote summary
-                        }
-                    }
+                    // Setup filters and display initial products in the estimator grid
+                    setupFilters();
+                    applyFiltersAndSearch(); // Initially display all products
+                    attachAllEventListeners(); // Attach all event listeners
+                    updateTotalAmount(); // Initial update for quote summary
                 },
                 error: function(error) {
                     console.error("Error loading data:", error);
-                    if (productGridContainer) productGridContainer.innerHTML = '<p class="no-results">Error: Could not load product data for catalog.</p>';
                     if (quoteProductGrid) quoteProductGrid.innerHTML = '<p class="no-results">Error: Could not load product data for estimation.</p>';
+                    if (productFiltersContainer) productFiltersContainer.innerHTML = '<p class="no-results">Error loading categories.</p>';
                 }
             });
         } catch (error) { console.error("A critical error occurred:", error); }
     }
 
     // ====================================================================================
-    // 3. CORE FUNCTIONS - Main Product Catalog
-    // ====================================================================================
-    function displayProducts(productsToDisplay) {
-        if (!productGridContainer) return; // Ensure element exists
-        productGridContainer.innerHTML = '';
-        if (productsToDisplay.length === 0) {
-            productGridContainer.innerHTML = '<p class="no-results">No products match your search.</p>';
-            return;
-        }
-        productsToDisplay.forEach(product => {
-            const rateHTML = product.rate ? `<div class="product-rate">₹${product.rate.toFixed(2)}</div>` : '';
-            const productCard = `
-                <div class="product-card fade-in">
-                    <img src="${product.image}" alt="${product.name}">
-                    <div class="card-content">
-                        <h3>${product.name}</h3>
-                        ${rateHTML} 
-                        <span class="category-badge">${product.subCategory || 'General'}</span>
-                        <p>${product.description || ''}</p>
-                    </div>
-                </div>`;
-            productGridContainer.innerHTML += productCard;
-        });
-
-        // Re-apply the fade-in animation to the newly created cards
-        const newCards = productGridContainer.querySelectorAll('.product-card');
-        const cardObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-        newCards.forEach(card => cardObserver.observe(card));
-    }
-
-    function setupFilters() {
-        if (!productFiltersContainer) return; // Ensure element exists
-        const categories = ['All', ...new Set(allProducts.map(p => p.category).filter(c => c))];
-        productFiltersContainer.innerHTML = categories.map(cat => `<button class="filter-btn ${cat === 'All' ? 'active-filter' : ''}" data-category="${cat}">${cat}</button>`).join('');
-    }
-
-    // ====================================================================================
-    // 4. CORE FUNCTIONS - Quote Estimation
+    // 3. CORE FUNCTIONS - Product Display & Filtering for Estimator
     // ====================================================================================
     function displayProductsForQuote(productsToDisplay) {
-        if (!quoteProductGrid) return; // Ensure element exists
+        if (!quoteProductGrid) return;
         quoteProductGrid.innerHTML = '';
         if (productsToDisplay.length === 0) {
-            quoteProductGrid.innerHTML = '<p class="no-results">No products available for estimation.</p>';
+            quoteProductGrid.innerHTML = '<p class="no-results">No products match your criteria.</p>';
             return;
         }
 
@@ -182,6 +122,40 @@ document.addEventListener('DOMContentLoaded', function() {
         newCards.forEach(card => cardObserver.observe(card));
     }
 
+    function setupFilters() {
+        if (!productFiltersContainer) return;
+        // Get categories from quotable products
+        const categories = ['All', ...new Set(quotableProducts.map(p => p.category).filter(c => c))];
+        productFiltersContainer.innerHTML = categories.map(cat => `<button class="filter-btn ${cat === currentActiveCategory ? 'active-filter' : ''}" data-category="${cat}">${cat}</button>`).join('');
+    }
+
+    function applyFiltersAndSearch() {
+        let filteredProducts = quotableProducts;
+
+        // Apply search term
+        const searchTerm = searchBar.value.toLowerCase();
+        if (searchTerm) {
+            filteredProducts = filteredProducts.filter(p => 
+                (p.name && p.name.toLowerCase().includes(searchTerm)) || 
+                (p.subCategory && p.subCategory.toLowerCase().includes(searchTerm)) || 
+                (p.category && p.category.toLowerCase().includes(searchTerm)) ||
+                (p.description && p.description.toLowerCase().includes(searchTerm)) 
+            );
+        }
+
+        // Apply category filter
+        const activeFilterBtn = productFiltersContainer.querySelector('.active-filter');
+        const selectedCategory = activeFilterBtn ? activeFilterBtn.dataset.category : 'All'; 
+        if (selectedCategory !== 'All') {
+            filteredProducts = filteredProducts.filter(p => p.category === selectedCategory);
+        }
+
+        displayProductsForQuote(filteredProducts);
+    }
+
+    // ====================================================================================
+    // 4. CORE FUNCTIONS - Quote Calculation
+    // ====================================================================================
     function updateIndividualItemTotal(productCard) {
         const productId = productCard.dataset.productId;
         const productRate = parseFloat(productCard.dataset.productRate);
@@ -193,21 +167,18 @@ document.addEventListener('DOMContentLoaded', function() {
             let quantity = parseInt(quantityInput.value) || 1;
             const total = (productRate * quantity);
             itemTotalSpan.textContent = total.toFixed(2);
-            selectedProducts[productId].quantity = quantity; // Ensure selectedProducts object is up-to-date
+            selectedProducts[productId].quantity = quantity; 
         } else {
             itemTotalSpan.textContent = '0.00';
         }
     }
 
     function updateTotalAmount() {
-        if (!totalAmountDisplay) return; // Ensure element exists
+        if (!totalAmountDisplay) return;
         let grandTotal = 0;
         for (const id in selectedProducts) {
             const item = selectedProducts[id];
-            // Ensure product and rate exist before calculation
-            if (item.product && item.product.rate) {
-                grandTotal += (item.product.rate * item.quantity);
-            } else if (item.rate) { // If 'product' key isn't explicitly there but 'rate' is, use it
+            if (item.rate) {
                 grandTotal += (item.rate * item.quantity);
             }
         }
@@ -218,40 +189,37 @@ document.addEventListener('DOMContentLoaded', function() {
     // 5. EVENT LISTENERS
     // ====================================================================================
     
-    // Main Product Catalog Event Listeners
-    if (searchBar && productFiltersContainer) {
-        searchBar.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            productFiltersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
-            const searchedProducts = allProducts.filter(p => 
-                (p.name && p.name.toLowerCase().includes(searchTerm)) || 
-                (p.subCategory && p.subCategory.toLowerCase().includes(searchTerm)) || 
-                (p.category && p.category.toLowerCase().includes(searchTerm))
-            );
-            displayProducts(searchedProducts);
-        });
-
-        productFiltersContainer.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON') {
+    function attachAllEventListeners() {
+        // Search Bar Listener
+        if (searchBar) {
+            searchBar.addEventListener('input', () => {
+                // Clear active filter when searching
                 productFiltersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
-                e.target.classList.add('active-filter');
-                searchBar.value = '';
-                const selectedCategory = e.target.dataset.category;
-                const filteredProducts = selectedCategory === 'All' ? allProducts : allProducts.filter(p => p.category === selectedCategory);
-                displayProducts(filteredProducts);
-            }
-        });
-    }
+                currentActiveCategory = 'All'; // Reset active category
+                applyFiltersAndSearch();
+            });
+        }
 
-    // Quote Estimation Event Listeners
-    function attachQuoteEventListeners() {
+        // Product Filters Listener (controls the estimator grid)
+        if (productFiltersContainer) {
+            productFiltersContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    productFiltersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+                    e.target.classList.add('active-filter');
+                    currentActiveCategory = e.target.dataset.category; // Update active category
+                    searchBar.value = ''; // Clear search when a filter is applied
+                    applyFiltersAndSearch(); // Apply filter to the grid
+                }
+            });
+        }
+
+        // Quote Estimation Grid Listeners (for selection and quantity)
         if (quoteProductGrid) {
             quoteProductGrid.addEventListener('change', (e) => {
                 const productCard = e.target.closest('.product-card');
                 if (!productCard) return;
 
                 const productId = productCard.dataset.productId;
-                const productRate = parseFloat(productCard.dataset.productRate);
                 const quantityInput = productCard.querySelector('.product-quantity-input');
                 const itemTotalSpan = productCard.querySelector('.calculated-item-total');
 
@@ -259,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (e.target.checked) {
                         const quantity = parseInt(quantityInput.value) || 1;
                         quantityInput.disabled = false;
-                        const fullProduct = allProducts.find(p => p.id === productId);
+                        const fullProduct = quotableProducts.find(p => p.id === productId); 
                         if (fullProduct) {
                             selectedProducts[productId] = { ...fullProduct, quantity: quantity };
                         }
@@ -283,6 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Print Quote Button Listener
         if (printQuoteButton) {
             printQuoteButton.addEventListener('click', () => {
                 let quoteContent = `
@@ -294,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             h1 { font-family: 'Poppins', sans-serif; color: #FFC107; text-align: center; margin-bottom: 30px; }
                             h2 { font-family: 'Poppins', sans-serif; color: #555; margin-top: 40px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
                             .quote-header { text-align: center; margin-bottom: 50px; }
-                            .quote-header img { max-width: 150px; margin-bottom: 10px; } /* If you want to add a logo */
+                            .quote-header img { max-width: 150px; margin-bottom: 10px; } 
                             .quote-date { text-align: right; font-size: 0.9em; color: #777; margin-bottom: 20px; }
                             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
                             th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
@@ -302,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             .total-row td { font-weight: bold; background-color: #fff3e0; }
                             .grand-total { font-size: 1.5em; font-weight: bold; text-align: right; margin-top: 30px; color: #FFC107; }
                             .note { font-size: 0.9em; color: #777; margin-top: 50px; text-align: center; }
-                            .gst-note { font-size: 1em; font-weight: bold; color: #555; text-align: right; margin-top: 15px; } /* Added style for GST note */
+                            .gst-note { font-size: 1em; font-weight: bold; color: #555; text-align: right; margin-top: 15px; } 
                         </style>
                     </head>
                     <body>
@@ -353,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </tr>
                             </tfoot>
                         </table>
-                        <p class="gst-note">GST Extra as per applicable</p> <!-- Added GST Note Here -->
+                        <p class="gst-note">GST Extra as per applicable</p>
                         <p class="note">This is an estimated quote. Prices are subject to change and final confirmation.</p>
                     </body>
                     </html>
@@ -364,12 +333,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     printWindow.document.open();
                     printWindow.document.write(quoteContent);
                     printWindow.document.close();
-                    printWindow.focus(); // Focus on the new window
-                    // Give the browser a moment to render the content before printing
+                    printWindow.focus(); 
                     setTimeout(() => {
                         printWindow.print();
-                        // Optionally close the window after print dialog is initiated
-                        // printWindow.close(); 
                     }, 500); 
                 } else {
                     alert('Please allow pop-ups for this website to generate the quote.');
@@ -377,50 +343,27 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Contact For Quote Button Listener (OPENS BASE GOOGLE FORM URL WITHOUT PRE-FILLING)
         if (contactForQuoteButton) {
             contactForQuoteButton.addEventListener('click', () => {
-                let productsSummary = [];
-                let grandTotal = 0;
+                // This button now simply opens the Google Form link provided.
+                window.open(GOOGLE_FORM_BASE_URL, '_blank');
+            });
+        }
 
-                for (const id in selectedProducts) {
-                    const item = selectedProducts[id];
-                    if (item.name && item.quantity && item.rate) {
-                        const itemTotal = (item.rate * item.quantity).toFixed(2);
-                        productsSummary.push(`${item.name} (Qty: ${item.quantity}) - ₹${itemTotal}`);
-                        grandTotal += (item.rate * item.quantity);
-                    }
+        // Shared Hamburger Menu Listener
+        if (hamburgerMenu && navUl) {
+            hamburgerMenu.addEventListener('click', () => { navUl.classList.toggle('active'); });
+            navUl.querySelectorAll('a').forEach(link => {
+                if (link.href.includes('#')) {
+                    link.addEventListener('click', () => { 
+                        if (navUl.classList.contains('active')) navUl.classList.remove('active'); 
+                    });
                 }
-
-                let prefilledFormURL = GOOGLE_FORM_BASE_URL + '/formResponse?';
-
-                if (productsSummary.length > 0) {
-                    const productsString = productsSummary.join('\n'); // Use newline for readability in form
-                    prefilledFormURL += `${GOOGLE_FORM_ENTRY_ID_PRODUCTS}=${encodeURIComponent(productsString)}&`;
-                } else {
-                    prefilledFormURL += `${GOOGLE_FORM_ENTRY_ID_PRODUCTS}=${encodeURIComponent('No products selected for estimate.')}&`;
-                }
-                
-                prefilledFormURL += `${GOOGLE_FORM_ENTRY_ID_TOTAL}=${encodeURIComponent(grandTotal.toFixed(2))}`;
-
-                window.open(prefilledFormURL, '_blank');
             });
         }
     }
 
-
-    // Shared Hamburger Menu Listener
-    if (hamburgerMenu && navUl) {
-        hamburgerMenu.addEventListener('click', () => { navUl.classList.toggle('active'); });
-        navUl.querySelectorAll('a').forEach(link => {
-            // Check if it's a local section link (starts with #)
-            if (link.href.includes('#')) {
-                link.addEventListener('click', () => { 
-                    // Only close if the menu is active
-                    if (navUl.classList.contains('active')) navUl.classList.remove('active'); 
-                });
-            }
-        });
-    }
 
     // ====================================================================================
     // 6. PAGE INITIALIZATION (Load data and apply animations)
@@ -433,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
             observer.unobserve(entry.target);
         });
     }, appearOptions);
-    faders.forEach(fader => initialFaders.observe(fader)); // Apply to all elements with .fade-in
+    faders.forEach(fader => initialFaders.observe(fader)); 
 
-    loadAllProductsAndInitialize(); // Start the data loading and initialization process
+    loadAllDataAndInitialize(); 
 });

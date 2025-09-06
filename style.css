@@ -136,3 +136,286 @@ footer { background: #1c2024; text-align: center; padding: 2rem 0; border-top: 1
         gap: 15px;
     }
 }
+
+/* --- Quote Estimation Page Specific Styles --- */
+#quote-estimation {
+    padding-top: 120px; /* Adjust for fixed header */
+    min-height: 80vh;
+}
+
+#quote-estimation h2 {
+    margin-bottom: 30px;
+}
+
+.section-description {
+    text-align: center;
+    max-width: 800px;
+    margin: -20px auto 60px auto;
+    font-size: 1.1rem;
+    color: #ccc;
+}
+
+.product-card.quote-item {
+    display: flex; /* Keep it flexible */
+    flex-direction: column;
+    justify-content: space-between; /* Push controls to bottom */
+}
+
+.quote-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 30px;
+    margin-bottom: 5px; /* Adjust as needed */
+    cursor: pointer;
+    font-size: 1rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: var(--light-color);
+    font-weight: 500;
+}
+
+/* Hide the browser's default checkbox */
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: var(--dark-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+}
+
+/* On mouse-over, add a light background color */
+.checkbox-container:hover input ~ .checkmark {
+    background-color: #555;
+}
+
+/* When the checkbox is checked, add a primary color background */
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Create the checkmark (hidden when not checked) */
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+/* Show the checkmark when checked */
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Style the checkmark */
+.checkbox-container .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid var(--dark-color);
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.quantity-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quantity-control label {
+    font-weight: 500;
+    color: var(--light-color);
+}
+
+.product-quantity-input {
+    width: 60px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.product-quantity-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(255, 193, 7, 0.5);
+}
+
+.product-quantity-input:disabled {
+    background-color: #333;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.item-total {
+    margin-top: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: right;
+    width: 100%; /* Ensure it spans full width */
+}
+
+#quote-summary {
+    background: var(--medium-dark-color);
+    border-radius: 12px;
+    box-shadow: var(--box-shadow);
+    padding: 30px;
+    margin-top: 60px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#quote-summary h3 {
+    font-size: 2.2rem;
+    margin-bottom: 25px;
+    color: var(--light-color);
+}
+
+#total-amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+}
+
+#quote-summary .cta-button {
+    margin: 10px;
+}
+
+.print-button {
+    background-color: var(--primary-color);
+    color: var(--dark-color);
+}
+
+.contact-button {
+    background-color: transparent;
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.contact-button:hover {
+    background-color: var(--primary-color);
+    color: var(--dark-color);
+}
+
+/* Print specific styles */
+@media print {
+    body {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    header, footer, .hamburger, #contact-for-quote-button, .print-button { /* Hide buttons when printing */
+        display: none !important;
+    }
+    #quote-estimation {
+        padding-top: 20px !important;
+    }
+    .product-card {
+        border: 1px solid #eee;
+        box-shadow: none;
+        page-break-inside: avoid;
+    }
+    .product-card img {
+        max-width: 100px; /* Smaller images for print */
+        max-height: 100px;
+        float: left;
+        margin-right: 15px;
+    }
+    .quote-controls {
+        display: none !important; /* Hide checkboxes and quantity inputs in print */
+    }
+    .item-total {
+        text-align: left;
+        color: #000;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    #quote-summary {
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+        box-shadow: none;
+        margin-top: 30px;
+    }
+    #total-amount {
+        color: #000;
+        text-shadow: none;
+        font-size: 2rem;
+    }
+    h1, h2, h3 {
+        color: #000 !important;
+    }
+    .section-description {
+        color: #333;
+    }
+}
+
+/* Adjustments for smaller screens on quote page */
+@media (max-width: 768px) {
+    .quote-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .quantity-control {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .product-quantity-input {
+        flex-grow: 1;
+        max-width: 100px;
+    }
+    .item-total {
+        text-align: left;
+    }
+    #total-amount {
+        font-size: 2rem;
+    }
+    #quote-summary h3 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-content h1 { font-size: 2rem; }
+    .hero-content p { font-size: 1rem; }
+    .search-container i { left: 15px; }
+    #search-bar { padding: 15px 15px 15px 45px; }
+    .filter-btn { padding: 8px 18px; font-size: 0.9rem; }
+    .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .product-card h3 { font-size: 1.2rem; }
+    .product-rate { font-size: 1.2rem; }
+    .cta-button { padding: 12px 25px; font-size: 0.9rem; }
+    .social-links a { font-size: 1.2rem; }
+    .contact-info a { font-size: 1rem; }
+}

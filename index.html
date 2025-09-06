@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SACHIN ELECTRICALS - Powering Your Projects</title>
-    <meta name="description" content="Search our extensive catalog of high-quality industrial and commercial electrical equipment from SACHIN ELECTRICALS.">
+    <meta name="description" content="Search our extensive catalog of high-quality industrial and commercial electrical equipment from SACHIN ELECTRICALS. Get an instant estimation for your needs.">
     
     <!-- Google AdSense Site Verification Meta Tag - PLACE THIS DIRECTLY IN THE HEAD -->
     <meta name="google-adsense-account" content="ca-pub-7077859622491715">
@@ -28,7 +28,7 @@
                 <ul id="nav-ul">
                     <li><a href="#products">Products</a></li>
                     <li><a href="#about">Why Us</a></li>
-                    <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6WsJ2WwG1Sf-zGlztKWA1V-vpg/viewform?usp=pp_url" target="_blank">Request Quote</a></li>
+                    <li><a href="#quote-estimation">Get Quote</a></li> <!-- Updated link -->
                 </ul>
             </nav>
         </div>
@@ -43,7 +43,7 @@
                     <i class="fas fa-search"></i>
                     <input type="text" id="search-bar" placeholder="Search by product name, type, or category...">
                 </div>
-                <a href="https://forms.gle/E3kDafQuXeNGb9YP8" target="_blank" class="cta-button">Get a Free Quote</a>
+                <a href="#quote-estimation" class="cta-button">Get a Free Quote</a> <!-- Updated link -->
             </div>
         </section>
         
@@ -80,6 +80,26 @@
              </div>
         </section>
 
+        <!-- START: Combined Quote Estimation Section -->
+        <section id="quote-estimation" class="fade-in">
+            <div class="container">
+                <h2>Generate Your Estimation</h2>
+                <p class="section-description">Select the products you need and specify quantities to get an instant quote.</p>
+
+                <div id="quote-product-grid" class="product-grid">
+                    <p class="no-results">Loading products for estimation...</p>
+                </div>
+
+                <div id="quote-summary">
+                    <h3>Your Estimation Summary</h3>
+                    <div id="total-amount">Total Estimated Amount: ₹0.00</div>
+                    <button class="cta-button print-button" id="print-quote">Print / Save Quote</button>
+                    <button class="cta-button contact-button" id="contact-for-quote-button">Contact for Final Quote</button>
+                </div>
+            </div>
+        </section>
+        <!-- END: Combined Quote Estimation Section -->
+
     </main>
 
     <footer>
@@ -104,7 +124,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
-    <script src="script.js"></script>
+    <script src="script.js"></script> <!-- Now this file contains all JS logic -->
 
 </body>
 </html>

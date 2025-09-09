@@ -18,7 +18,7 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; } /* scroll-padding-top for header */
 
 body { 
     font-family: var(--font-body); 
@@ -98,8 +98,8 @@ nav a:hover {
 }
 .hamburger { display: none; cursor: pointer; font-size: 2rem; color: var(--primary-color); } /* Larger hamburger icon */
 
-/* --- Unified Hero/Estimation Section --- */
-#hero { 
+/* --- Estimator Section (Original Hero styles) --- */
+#estimator-section { 
     background: linear-gradient(rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0.85)), url('https://images.pexels.com/photos/257736/pexels-photo-257736.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2') no-repeat center center/cover; 
     background-size: cover; 
     min-height: 100vh; 
@@ -111,7 +111,7 @@ nav a:hover {
     color: var(--light-color); 
     flex-direction: column; 
 }
-#hero .hero-content {
+#estimator-section .hero-content {
     max-width: 1200px;
     margin: auto; 
     width: 100%;
@@ -120,26 +120,27 @@ nav a:hover {
     align-items: center;
     gap: 30px; /* Increased spacing between elements */
 }
-#hero h1 { 
+#estimator-section h1 { 
     font-size: 4rem; /* Larger hero heading */
     text-shadow: 0 6px 20px rgba(0,0,0,0.6); /* More pronounced shadow */
     margin-bottom: 0; 
     line-height: 1.1;
 }
-#hero p { 
+#estimator-section p { 
     font-size: 1.4rem; /* Larger hero paragraph */
     max-width: 800px; /* Wider paragraph */
     margin-bottom: 10px; 
     color: var(--secondary-text-color); /* Slightly subdued text color */
 }
-#hero h2 { /* Styling for "Generate Your Estimation" */
+/* This h2 was likely intended for "Generate Your Estimation" within the hero, adjusted to match new section headings */
+#estimator-section h2 { 
     font-size: 2.8rem; 
     margin-top: 60px; 
     margin-bottom: 30px; 
     position: relative; 
     color: var(--light-color);
 }
-#hero h2::after { 
+#estimator-section h2::after { 
     content: ''; 
     position: absolute; 
     bottom: -15px; 
@@ -527,26 +528,162 @@ footer p {
     font-size: 1.25rem; /* Larger icon */
 }
 
+/* Added footer navigation styles */
+.footer-nav {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 25px; /* Space out the links */
+    flex-wrap: wrap;
+}
+
+.footer-nav a {
+    color: var(--secondary-text-color);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color var(--transition-speed) ease;
+}
+
+.footer-nav a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Styles for general content pages (About Us, Contact Us, Privacy Policy, Terms) */
+.page-content {
+    padding-top: 120px; /* Adjust for fixed header */
+    padding-bottom: 80px;
+    min-height: calc(100vh - 80px); /* Ensure some height even with minimal content, accounting for header/footer */
+    background-color: var(--dark-color); /* Consistent background */
+    color: var(--text-color);
+    display: none; /* Hidden by default */
+    align-items: center; /* Center content horizontally within the section */
+    justify-content: flex-start; /* Align content to top */
+}
+
+.page-content.active-page-content {
+    display: flex; /* Show active section, using flex for internal centering if needed */
+    flex-direction: column; /* Ensure content stacks */
+}
+
+
+.page-content .container {
+    background-color: var(--medium-dark-color);
+    padding: 40px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-light);
+    text-align: left; /* Content should align left */
+    width: 100%; /* Take full width of parent */
+    max-width: 900px; /* Limit content width for readability */
+}
+
+.page-content h2 {
+    text-align: left; /* Override center alignment for h2 */
+    margin-left: 0;
+    margin-right: 0;
+    font-size: 2.2rem;
+    color: var(--primary-color); /* Main headings on content pages */
+}
+.page-content h2::after {
+    left: 0; /* Align underline to left */
+    transform: translateX(0);
+}
+.page-content h3 {
+    font-size: 1.6rem;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: var(--light-color);
+}
+
+.page-content p {
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+}
+
+.page-content ul {
+    list-style-type: disc;
+    margin-left: 25px;
+    margin-bottom: 20px;
+    color: var(--secondary-text-color);
+}
+
+.page-content ul li {
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+}
+.page-content ol {
+    list-style-type: decimal;
+    margin-left: 25px;
+    margin-bottom: 20px;
+    color: var(--secondary-text-color);
+}
+.page-content ol li {
+    margin-bottom: 8px;
+    font-size: 1.05rem;
+}
+
+/* Contact Page Specific Styles (removed form related styles as the form is gone) */
+.contact-details {
+    margin-top: 30px;
+    margin-bottom: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 1.1rem;
+    color: var(--light-color);
+}
+
+.contact-item i {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    min-width: 25px; /* Ensure icon doesn't shift text */
+    text-align: center;
+}
+
+.contact-item a {
+    color: var(--light-color);
+    text-decoration: none;
+    transition: color var(--transition-speed) ease;
+}
+
+.contact-item a:hover {
+    color: var(--primary-color);
+}
+
+
 /* --- Scroll & Load Animations --- */
 .fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; } /* Slower, longer animation */
 .fade-in.visible { opacity: 1; transform: translateY(0); }
 
 /* --- Responsive Design --- */
 @media (max-width: 992px) { 
-    #hero h1 { font-size: 3.5rem; }
-    #hero h2 { font-size: 2.2rem; }
-    #hero p { font-size: 1.25rem; }
+    #estimator-section h1 { font-size: 3.5rem; }
+    #estimator-section h2 { font-size: 2.2rem; }
+    #estimator-section p { font-size: 1.25rem; }
     .product-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } /* Adjust grid for smaller screens */
     #quote-summary h3 { font-size: 2rem; }
     #total-amount { font-size: 2.5rem; }
+
+    .page-content { padding-top: 100px; } /* Adjust for header on other pages */
+    .page-content h2 { font-size: 2rem; }
+    .page-content h3 { font-size: 1.4rem; }
+    .page-content p, .page-content ul li, .page-content ol li { font-size: 1rem; }
+    .contact-item { font-size: 1rem; }
+    .contact-item i { font-size: 1.2rem; }
 }
 @media (max-width: 768px) { 
     section { padding: 60px 0; }
     h2 { font-size: 2.2rem; margin-bottom: 40px; }
-    #hero { padding-top: 100px; padding-bottom: 60px; }
-    #hero h1 { font-size: 3rem; } 
-    #hero h2 { font-size: 1.8rem; }
-    #hero p { font-size: 1.1rem; margin-bottom: 20px; } 
+    #estimator-section { padding-top: 100px; padding-bottom: 60px; }
+    #estimator-section h1 { font-size: 3rem; } 
+    #estimator-section h2 { font-size: 1.8rem; }
+    #estimator-section p { font-size: 1.1rem; margin-bottom: 20px; } 
     .hamburger { display: block; } 
     nav ul { 
         display: none; 
@@ -572,6 +709,7 @@ footer p {
     .filter-btn { padding: 10px 20px; font-size: 0.95rem; }
     .product-grid { gap: 25px; margin-bottom: 40px; }
     .product-card h3 { font-size: 1.3rem; }
+    .product-card p { font-size: 0.95rem; }
     .product-rate { font-size: 1.4rem; }
     .category-badge { padding: 5px 10px; font-size: 0.8rem; }
     .quote-controls { flex-direction: column; align-items: flex-start; gap: 15px; margin-top: 15px; padding-top: 15px; }
@@ -585,12 +723,19 @@ footer p {
     footer { padding: 2rem 0; }
     .social-links a { margin: 0 12px; font-size: 1.4rem; }
     .contact-info a { font-size: 1.05rem; }
+    .footer-nav { margin-top: 20px; gap: 15px; }
+
+    .page-content { padding-top: 100px; padding-bottom: 60px; }
+    .page-content .container { padding: 30px; }
+    .page-content h2 { font-size: 1.8rem; }
+    .page-content h3 { font-size: 1.3rem; }
+    .page-content p, .page-content ul li, .page-content ol li { font-size: 0.95rem; }
 }
 
 @media (max-width: 480px) {
-    #hero h1 { font-size: 2.2rem; }
-    #hero h2 { font-size: 1.6rem; margin-bottom: 30px; }
-    #hero p { font-size: 1rem; }
+    #estimator-section h1 { font-size: 2.2rem; }
+    #estimator-section h2 { font-size: 1.6rem; margin-bottom: 30px; }
+    #estimator-section p { font-size: 1rem; }
     .search-container i { left: 15px; font-size: 1.1rem; }
     #search-bar { padding: 12px 15px 12px 45px; font-size: 0.95rem; }
     .filter-btn { padding: 8px 15px; font-size: 0.85rem; }
@@ -613,6 +758,14 @@ footer p {
     .social-links a { margin: 0 10px; font-size: 1.3rem; }
     .contact-info a { font-size: 1rem; }
     .contact-info i { margin-right: 6px; font-size: 1.1rem; }
+    .footer-nav { gap: 10px; font-size: 0.85rem; }
+
+    .page-content .container { padding: 20px; }
+    .page-content h2 { font-size: 1.6rem; }
+    .page-content h3 { font-size: 1.2rem; }
+    .page-content p, .page-content ul li, .page-content ol li { font-size: 0.9rem; }
+    .contact-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .contact-item i { min-width: auto; margin-right: 0; }
 }
 
 /* Print specific styles for the generated quote window (no change here, as it's for a popup) */
@@ -621,22 +774,34 @@ footer p {
         background: #fff !important;
         color: #000 !important;
     }
-    header, footer, .hamburger, #hero .cta-button, .search-container, .product-filters, .quote-controls { 
+    header, footer, .hamburger, #estimator-section .cta-button, .search-container, .product-filters, .quote-controls,
+    .page-content:not(.active-page-content) /* Hide all non-active content sections */
+    { 
         display: none !important;
     }
-    #hero { 
+    /* Ensure the active content section is displayed when printing */
+    .page-content.active-page-content {
+        display: block !important; /* Use block for print layout */
+        flex-direction: unset !important;
+        justify-content: unset !important;
+        align-items: unset !important;
         padding-top: 20px !important;
         min-height: auto !important; 
         background: none !important; 
         color: #000 !important; 
-        align-items: flex-start !important; /* Adjust alignment for print */
     }
-    #hero .hero-content {
+
+    #estimator-section .hero-content, .page-content .container {
         margin: 0 !important;
         align-items: flex-start !important; /* Adjust alignment for print */
         gap: 15px !important;
+        background-color: #fff !important;
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0 !important;
     }
-    #hero h1, #hero h2, #hero h3, #hero p {
+    #estimator-section h1, #estimator-section h2, #estimator-section h3, #estimator-section p,
+    .page-content h2, .page-content h3, .page-content p, .page-content ul li, .page-content ol li {
         color: #000 !important;
         text-shadow: none !important;
         text-align: left !important; /* Ensure text is left aligned in print */
@@ -644,10 +809,10 @@ footer p {
         margin-right: 0 !important;
         max-width: none !important;
     }
-    #hero h2::after {
+    #estimator-section h2::after, .page-content h2::after {
         display: none !important; /* Hide underline for print */
     }
-    #hero .section-description {
+    #estimator-section .section-description {
         color: #333 !important;
         text-align: left !important;
     }
@@ -673,7 +838,7 @@ footer p {
         border: 1px solid #ddd;
         box-shadow: none;
         margin-top: 30px;
-        text-align: left !important; /* Adjust alignment for print */
+        text-align: left !important;
     }
     #quote-summary h3 {
         text-align: left !important;
@@ -683,5 +848,8 @@ footer p {
         text-shadow: none;
         font-size: 2rem;
         text-align: left !important;
+    }
+    .contact-item a {
+        color: #333 !important;
     }
 }

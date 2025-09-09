@@ -15,10 +15,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const GOOGLE_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6WsJ2WwG1Sf-zGlztKWA1V-vpg/viewform';
 
 
-    // Get references to HTML elements (all now within the unified hero/estimator section)
+    // Get references to HTML elements
     const quoteProductGrid = document.getElementById('quote-product-grid'); 
     const productFiltersContainer = document.getElementById('product-filters');
-    const searchBar = document.getElementById('search-bar'); // This is the main search input now
+    const searchBar = document.getElementById('search-bar');
     const totalAmountDisplay = document.getElementById('total-amount');
     const printQuoteButton = document.getElementById('print-quote');
     const contactForQuoteButton = document.getElementById('contact-for-quote-button');
@@ -27,6 +27,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const navUl = document.getElementById('nav-ul');
     const faders = document.querySelectorAll('.fade-in'); // For initial fade-in animation
+
+    // Elements for single-page navigation
+    const pageContentSections = document.querySelectorAll('.page-content');
+    const headerNavLinks = document.querySelectorAll('.header-nav-link'); // Selects links that trigger JS navigation
+    const footerNavLinks = document.querySelectorAll('.footer-nav-link');
+
 
     let quotableProducts = [];    // Stores ALL loaded products suitable for estimation (with rates)
     let selectedProducts = {}; // Stores {productId: {product, quantity}} for the quote estimator
@@ -56,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Setup filters and display initial products in the estimator grid
                     setupFilters();
                     applyFiltersAndSearch(); // Initially display all products
-                    attachAllEventListeners(); // Attach all event listeners
                     updateTotalAmount(); // Initial update for quote summary
                 },
                 error: function(error) {
@@ -186,34 +191,97 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ====================================================================================
-    // 5. EVENT LISTENERS
+    // 5. SINGLE-PAGE NAVIGATION FUNCTIONS
+    // ====================================================================================
+    function hideAllSections() {
+        pageContentSections.forEach(section => {
+            section.classList.remove('active-page-content');
+            section.classList.add('hidden');
+        });
+    }
+
+    // Function to show a specific content section and scroll to an element within it
+    function showSection(targetElementId) {
+        let sectionToShowId;
+        const targetElement = document.getElementById(targetElementId);
+
+        if (!targetElement) {
+            console.warn(`Target element with ID "${targetElementId}" not found. Defaulting to estimator-section.`);
+            sectionToShowId = 'estimator-section';
+        } else {
+            // Find the parent section of the target element
+            let currentElement = targetElement;
+            while (currentElement && !currentElement.classList.contains('page-content')) {
+                currentElement = currentElement.parentElement;
+            }
+            if (currentElement) {
+                sectionToShowId = currentElement.id;
+            } else {
+                console.warn(`Parent .page-content section not found for element ID "${targetElementId}". Defaulting to estimator-section.`);
+                sectionToShowId = 'estimator-section';
+            }
+        }
+
+        hideAllSections();
+        const activeSection = document.getElementById(sectionToShowId);
+
+        if (activeSection) {
+            activeSection.classList.remove('hidden');
+            activeSection.classList.add('active-page-content');
+
+            const headerHeight = document.querySelector('header').offsetHeight;
+            const scrollOffset = headerHeight + 20; // Extra 20px for visual spacing
+
+            const elementToScrollTo = document.getElementById(targetElementId);
+            if (elementToScrollTo) {
+                const elementPosition = elementToScrollTo.getBoundingClientRect().top + window.pageYOffset;
+                window.scrollTo({
+                    top: elementPosition - scrollOffset,
+                    behavior: 'smooth'
+                });
+            } else { // Fallback to scrolling to the top of the section if specific element not found or is the section itself
+                window.scrollTo({
+                    top: activeSection.getBoundingClientRect().top + window.pageYOffset - scrollOffset,
+                    behavior: 'smooth'
+                });
+            }
+
+            // Special handling for the estimator section to ensure it's functional
+            if (sectionToShowId === 'estimator-section') {
+                applyFiltersAndSearch();
+                updateTotalAmount();
+            }
+        }
+    }
+
+    // ====================================================================================
+    // 6. EVENT LISTENERS
     // ====================================================================================
     
     function attachAllEventListeners() {
-        // Search Bar Listener
+        // Search Bar Listener (only present in estimator section)
         if (searchBar) {
             searchBar.addEventListener('input', () => {
-                // Clear active filter when searching
-                productFiltersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
-                currentActiveCategory = 'All'; // Reset active category
+                if (productFiltersContainer) productFiltersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
+                currentActiveCategory = 'All';
                 applyFiltersAndSearch();
             });
         }
 
-        // Product Filters Listener (controls the estimator grid)
+        // Product Filters Listener (only present in estimator section)
         if (productFiltersContainer) {
             productFiltersContainer.addEventListener('click', (e) => {
                 if (e.target.tagName === 'BUTTON') {
                     productFiltersContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active-filter'));
                     e.target.classList.add('active-filter');
-                    currentActiveCategory = e.target.dataset.category; // Update active category
-                    searchBar.value = ''; // Clear search when a filter is applied
-                    applyFiltersAndSearch(); // Apply filter to the grid
+                    currentActiveCategory = e.target.dataset.category;
+                    if (searchBar) searchBar.value = '';
+                    applyFiltersAndSearch();
                 }
             });
         }
 
-        // Quote Estimation Grid Listeners (for selection and quantity)
+        // Quote Estimation Grid Listeners (only present in estimator section)
         if (quoteProductGrid) {
             quoteProductGrid.addEventListener('change', (e) => {
                 const productCard = e.target.closest('.product-card');
@@ -251,10 +319,32 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Print Quote Button Listener
+        // Print Quote Button Listener (only present in estimator section)
         if (printQuoteButton) {
             printQuoteButton.addEventListener('click', () => {
-                let quoteContent = `
+                let grandTotal = 0;
+                let quoteRows = '';
+                if (Object.keys(selectedProducts).length === 0) {
+                    quoteRows = `<tr><td colspan="4">No products selected for estimation.</td></tr>`;
+                } else {
+                    for (const id in selectedProducts) {
+                        const item = selectedProducts[id];
+                        if (item.name && item.quantity && item.rate) {
+                            const itemTotal = (item.rate * item.quantity);
+                            grandTotal += itemTotal;
+                            quoteRows += `
+                                <tr>
+                                    <td>${item.name} <br><small>(${item.subCategory || 'N/A'})</small></td>
+                                    <td>${item.quantity}</td>
+                                    <td>${item.rate.toFixed(2)}</td>
+                                    <td>${itemTotal.toFixed(2)}</td>
+                                </tr>
+                            `;
+                        }
+                    }
+                }
+                
+                const quoteContent = `
                     <html>
                     <head>
                         <title>SACHIN ELECTRICALS - Your Estimated Quote</title>
@@ -290,30 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </tr>
                             </thead>
                             <tbody>
-                `;
-
-                let grandTotal = 0;
-                if (Object.keys(selectedProducts).length === 0) {
-                    quoteContent += `<tr><td colspan="4">No products selected for estimation.</td></tr>`;
-                } else {
-                    for (const id in selectedProducts) {
-                        const item = selectedProducts[id];
-                        if (item.name && item.quantity && item.rate) {
-                            const itemTotal = (item.rate * item.quantity);
-                            grandTotal += itemTotal;
-                            quoteContent += `
-                                <tr>
-                                    <td>${item.name} <br><small>(${item.subCategory || 'N/A'})</small></td>
-                                    <td>${item.quantity}</td>
-                                    <td>${item.rate.toFixed(2)}</td>
-                                    <td>${itemTotal.toFixed(2)}</td>
-                                </tr>
-                            `;
-                        }
-                    }
-                }
-                
-                quoteContent += `
+                                ${quoteRows}
                             </tbody>
                             <tfoot>
                                 <tr class="total-row">
@@ -343,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Contact For Quote Button Listener (OPENS BASE GOOGLE FORM URL WITHOUT PRE-FILLING)
+        // Contact For Quote Button Listener (OPENS BASE GOOGLE FORM URL WITHOUT PRE-FILLING) (only present in estimator section)
         if (contactForQuoteButton) {
             contactForQuoteButton.addEventListener('click', () => {
                 // This button now simply opens the Google Form link provided.
@@ -354,20 +421,52 @@ document.addEventListener('DOMContentLoaded', function() {
         // Shared Hamburger Menu Listener
         if (hamburgerMenu && navUl) {
             hamburgerMenu.addEventListener('click', () => { navUl.classList.toggle('active'); });
+            // Close menu and navigate to section when a nav link is clicked
             navUl.querySelectorAll('a').forEach(link => {
-                if (link.href.includes('#')) {
-                    link.addEventListener('click', () => { 
+                link.addEventListener('click', (e) => { 
+                    // Only prevent default and handle with JS if it's an internal link
+                    if (link.classList.contains('header-nav-link')) {
+                        e.preventDefault(); 
+                        const targetId = link.getAttribute('href').substring(1);
+                        showSection(targetId);
                         if (navUl.classList.contains('active')) navUl.classList.remove('active'); 
-                    });
-                }
+                    }
+                });
             });
+        }
+
+        // Single-page navigation for header links
+        headerNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                showSection(targetId);
+            });
+        });
+
+        // Single-page navigation for footer links
+        footerNavLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                showSection(targetId);
+            });
+        });
+
+        // Handle initial load based on URL hash
+        const initialHash = window.location.hash.substring(1);
+        if (initialHash) {
+            showSection(initialHash);
+        } else {
+            showSection('estimator-section'); // Default to estimator section
         }
     }
 
 
     // ====================================================================================
-    // 6. PAGE INITIALIZATION (Load data and apply animations)
+    // 7. PAGE INITIALIZATION (Load data and apply animations)
     // ====================================================================================
+    // Initial setup for faders (visible only on estimator section initially)
     const appearOptions = { threshold: 0.2, rootMargin: "0px 0px -50px 0px" };
     const initialFaders = new IntersectionObserver(function(entries, observer) {
         entries.forEach(entry => {
@@ -378,5 +477,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }, appearOptions);
     faders.forEach(fader => initialFaders.observe(fader)); 
 
-    loadAllDataAndInitialize(); 
+    // Load product data and initialize estimator UI
+    loadAllDataAndInitialize();
+    
+    // Attach all event listeners after initial data load/UI setup
+    attachAllEventListeners(); 
 });

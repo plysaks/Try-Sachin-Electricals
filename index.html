@@ -145,6 +145,7 @@
                     <li>Improve, personalize, and expand our website</li>
                     <li>Understand and analyze how you use our website</li>
                     <li>Develop new products, services, features, and functionality</li>
+                    <li>Update the quote if selected products change</li>
                     <li>Communicate with you, either directly or through one of our partners, including for customer service, to provide you with updates and other information relating to the website, and for marketing and promotional purposes</li>
                     <li>Send you emails</li>
                     <li>Find and prevent fraud</li>
@@ -301,8 +302,37 @@
         </div>
     </footer>
 
+    <!-- Product Modal Structure -->
+    <div id="product-modal-overlay" class="hidden">
+        <div id="product-modal-content">
+            <button id="modal-close-btn" class="modal-close-btn"><i class="fas fa-times"></i></button>
+            <div class="modal-body">
+                <img id="modal-product-image" src="" alt="Product Image">
+                <div class="modal-details">
+                    <h3 id="modal-product-name"></h3>
+                    <div id="modal-product-description"></div>
+                    <div id="modal-product-test"></div>
+                    <div id="modal-quote-controls" class="quote-controls">
+                        <label class="checkbox-container">
+                            Select:
+                            <input type="checkbox" class="product-select-checkbox-modal">
+                            <span class="checkmark"></span>
+                        </label>
+                        <div class="quantity-control">
+                            <label for="qty-modal">Qty:</label>
+                            <input type="number" id="qty-modal" class="product-quantity-input-modal" value="1" min="1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="script.js"></script>
 
 </body>
-</html>
+</html>```
+
+
+

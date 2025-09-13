@@ -23,6 +23,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const printQuoteButton = document.getElementById('print-quote');
     const contactForQuoteButton = document.getElementById('contact-for-quote-button');
 
+    // Modal elements
+    const productModalOverlay = document.getElementById('product-modal-overlay');
+    const productModalContent = document.getElementById('product-modal-content');
+    const modalCloseBtn = document.getElementById('modal-close-btn');
+    const modalProductImage = document.getElementById('modal-product-image');
+    const modalProductName = document.getElementById('modal-product-name');
+    const modalProductDescription = document.getElementById('modal-product-description');
+    const modalProductTest = document.getElementById('modal-product-test');
+    const modalQuoteControls = document.getElementById('modal-quote-controls');
+    const modalSelectCheckbox = modalQuoteControls.querySelector('.product-select-checkbox-modal');
+    const modalQuantityInput = modalQuoteControls.querySelector('.product-quantity-input-modal');
+
+
     // Shared elements
     const hamburgerMenu = document.getElementById('hamburger-menu');
     const navUl = document.getElementById('nav-ul');
@@ -39,6 +52,20 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentActiveCategory = 'All'; // To keep track of the currently active filter
 
     // ====================================================================================
+    // Utility Function to convert URLs in text into clickable links
+    // ====================================================================================
+    function linkify(text) {
+        if (!text || typeof text !== 'string') {
+            return '';
+        }
+        // Regex to find URLs (http, https)
+        const urlRegex = /(https?:\/\/[^\s]+)/g;
+        return text.replace(urlRegex, (url) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+        });
+    }
+
+    // ====================================================================================
     // 2. DATA LOADING & INITIALIZATION
     // ====================================================================================
     async function loadAllDataAndInitialize() {
@@ -51,6 +78,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     quotableProducts = results.data.filter(p => p.name && p.name.trim() !== "" && typeof p.rate === 'number' && p.rate > 0);
                     quotableProducts.forEach((p, index) => {
                         if (!p.id) p.id = `product-${index}`;
+                        // Ensure a default for warranty, description, and test if not present in data
+                        if (typeof p.warranty === 'undefined') p.warranty = ''; 
+                        if (typeof p.description === 'undefined') p.description = '';
+                        if (typeof p.Test === 'undefined') p.Test = ''; // Ensure 'Test' field is initialized
                     });
 
                     if (quotableProducts.length === 0) {
@@ -89,14 +120,22 @@ document.addEventListener('DOMContentLoaded', function() {
             const quantity = selectedProducts[product.id] ? selectedProducts[product.id].quantity : 1;
             const currentItemTotal = (product.rate * quantity).toFixed(2);
 
+            // Determine if description is long enough to be truncated (e.g., > 100 characters)
+            const isDescriptionLong = (product.description && product.description.length > 100); 
+            const warrantyHtml = product.warranty ? `<div class="product-warranty">Warranty: ${product.warranty}</div>` : '';
+
             const productCard = `
                 <div class="product-card quote-item fade-in" data-product-id="${product.id}" data-product-rate="${product.rate}">
                     <img src="${product.image}" alt="${product.name}">
                     <div class="card-content">
                         <h3>${product.name}</h3>
-                        <p>${product.description || ''}</p>
+                        <div class="product-description-wrapper ${isDescriptionLong ? '' : 'no-truncate'}">
+                            <p>${linkify(product.description || '')}</p>
+                        </div>
+                        <!-- Read more button is not rendered for normal card view as single click does nothing -->
                         <span class="category-badge">${product.subCategory || 'General'}</span>
                         <div class="product-rate">Rate: ₹${product.rate.toFixed(2)}</div>
+                        ${warrantyHtml}
                         
                         <div class="quote-controls">
                             <label class="checkbox-container">
@@ -115,7 +154,15 @@ document.addEventListener('DOMContentLoaded', function() {
             quoteProductGrid.innerHTML += productCard;
         });
 
+        // Re-attach dblclick listeners to newly rendered cards
         const newCards = quoteProductGrid.querySelectorAll('.product-card');
+        newCards.forEach(card => {
+            // REMOVED THE OFFENDING LINE: card.removeEventListener('click', handleProductCardSingleClick);
+            // Single clicks on the card body now do nothing by default as there's no listener.
+            card.addEventListener('dblclick', handleProductCardDblClick);
+        });
+
+        // Re-observe for fade-in animation
         const cardObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -255,6 +302,100 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ====================================================================================
+    // MODAL FUNCTIONS
+    // ====================================================================================
+    let currentModalProductId = null; // To keep track of the product in the modal
+
+    function openProductModal(productId) {
+        const product = quotableProducts.find(p => p.id === productId);
+        if (!product) {
+            console.error("Product not found for modal:", productId);
+            return;
+        }
+
+        currentModalProductId = productId; // Store the ID
+
+        modalProductImage.src = product.image;
+        modalProductImage.alt = product.name;
+        modalProductName.textContent = product.name;
+        modalProductDescription.innerHTML = linkify(product.description || 'No description available.');
+        modalProductTest.textContent = `Test: ${product.Test || 'N/A'}`; // Display the 'Test' column value
+
+        // Update modal's "Select" and "Qty" based on current selection in the main grid
+        if (selectedProducts[productId]) {
+            modalSelectCheckbox.checked = true;
+            modalQuantityInput.value = selectedProducts[productId].quantity;
+            modalQuantityInput.disabled = false;
+        } else {
+            modalSelectCheckbox.checked = false;
+            modalQuantityInput.value = 1;
+            modalQuantityInput.disabled = true;
+        }
+
+        productModalOverlay.classList.add('visible');
+        document.body.classList.add('modal-open'); // Add class to body to prevent scroll
+    }
+
+    function closeProductModal() {
+        productModalOverlay.classList.remove('visible');
+        document.body.classList.remove('modal-open'); // Remove class from body
+        currentModalProductId = null; // Clear the stored ID
+    }
+
+    // Event handler for double click on product card
+    function handleProductCardDblClick(e) {
+        const productCard = e.target.closest('.product-card');
+        if (productCard) {
+            const productId = productCard.dataset.productId;
+            openProductModal(productId);
+            // IMPORTANT: No implicit selection here, only view
+        }
+    }
+    
+    // This function will handle the checkbox/quantity inputs inside the modal and sync to main grid
+    function syncModalQuoteWithMainGrid(productId) {
+        const mainGridCard = document.querySelector(`.product-card[data-product-id="${productId}"]`);
+        if (!mainGridCard) return;
+
+        const mainCheckbox = mainGridCard.querySelector('.product-select-checkbox');
+        const mainQuantityInput = mainGridCard.querySelector('.product-quantity-input');
+        const mainItemTotalSpan = mainGridCard.querySelector('.calculated-item-total');
+
+        if (modalSelectCheckbox.checked) {
+            // Add/Update in selectedProducts
+            let quantity = parseInt(modalQuantityInput.value) || 1;
+            const fullProduct = quotableProducts.find(p => p.id === productId); 
+            if (fullProduct) {
+                selectedProducts[productId] = { ...fullProduct, quantity: quantity };
+            }
+
+            // Update main grid's UI
+            if (mainCheckbox) mainCheckbox.checked = true;
+            if (mainQuantityInput) {
+                mainQuantityInput.value = quantity;
+                mainQuantityInput.disabled = false;
+            }
+        } else {
+            // Remove from selectedProducts
+            delete selectedProducts[productId];
+
+            // Update main grid's UI
+            if (mainCheckbox) mainCheckbox.checked = false;
+            if (mainQuantityInput) {
+                mainQuantityInput.value = 1;
+                mainQuantityInput.disabled = true;
+            }
+            if (mainItemTotalSpan) mainItemTotalSpan.textContent = '0.00';
+        }
+        
+        // Ensure totals are updated after synchronization
+        updateTotalAmount();
+        // Update individual item total in the main grid if the card is visible
+        if (mainGridCard) updateIndividualItemTotal(mainGridCard);
+    }
+
+
+    // ====================================================================================
     // 6. EVENT LISTENERS
     // ====================================================================================
     
@@ -281,7 +422,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Quote Estimation Grid Listeners (only present in estimator section)
+        // Quote Estimation Grid CHANGE Listener (handles checkbox/quantity changes in main grid)
+        // This is separate from card clicks.
         if (quoteProductGrid) {
             quoteProductGrid.addEventListener('change', (e) => {
                 const productCard = e.target.closest('.product-card');
@@ -318,6 +460,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateTotalAmount();
             });
         }
+
+        // IMPORTANT: No single-click listener on product card for expansion/selection here.
+        // Dblclick listener is attached dynamically in displayProductsForQuote for modal.
+
+        // Modal Close Button Listener
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', closeProductModal);
+        }
+
+        // Close modal when clicking outside content
+        if (productModalOverlay) {
+            productModalOverlay.addEventListener('click', (e) => {
+                if (e.target === productModalOverlay) {
+                    closeProductModal();
+                }
+            });
+        }
+
+        // Listen for ESC key to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && productModalOverlay.classList.contains('visible')) {
+                closeProductModal();
+            }
+        });
+
+        // Modal's "Select" checkbox listener
+        if (modalSelectCheckbox && modalQuantityInput) {
+            modalSelectCheckbox.addEventListener('change', () => {
+                modalQuantityInput.disabled = !modalSelectCheckbox.checked;
+                if (!modalSelectCheckbox.checked) {
+                    modalQuantityInput.value = 1;
+                }
+                if (currentModalProductId) {
+                    syncModalQuoteWithMainGrid(currentModalProductId);
+                }
+            });
+
+            // Modal's "Qty" input listener
+            modalQuantityInput.addEventListener('input', () => {
+                let quantity = parseInt(modalQuantityInput.value);
+                if (isNaN(quantity) || quantity < 1) {
+                    quantity = 1;
+                    modalQuantityInput.value = 1;
+                }
+                if (currentModalProductId) {
+                    syncModalQuoteWithMainGrid(currentModalProductId);
+                }
+            });
+        }
+
 
         // Print Quote Button Listener (only present in estimator section)
         if (printQuoteButton) {
@@ -470,9 +662,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const appearOptions = { threshold: 0.2, rootMargin: "0px 0px -50px 0px" };
     const initialFaders = new IntersectionObserver(function(entries, observer) {
         entries.forEach(entry => {
-            if (!entry.isIntersecting) return;
-            entry.target.classList.add('visible');
-            observer.unobserve(entry.target);
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
         });
     }, appearOptions);
     faders.forEach(fader => initialFaders.observe(fader)); 

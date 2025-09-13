@@ -29,6 +29,11 @@ body {
     color: var(--text-color); 
 }
 
+/* Class to prevent body scrolling when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
+
 .container { max-width: 1200px; margin: auto; padding: 0 20px; }
 h1, h2, h3 { 
     font-family: var(--font-heading); 
@@ -243,10 +248,11 @@ nav a:hover {
     border-radius: var(--border-radius-md); 
     box-shadow: var(--box-shadow-light); /* Apply light shadow */
     border: 1px solid rgba(255, 255, 255, 0.1); 
-    overflow: hidden; 
+    overflow: hidden; /* Important for description truncation */
     display: flex; 
     flex-direction: column; 
     transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease; 
+    cursor: pointer; /* Indicate it's clickable */
 }
 .product-card:hover { 
     transform: translateY(-12px); /* More pronounced lift */
@@ -264,6 +270,7 @@ nav a:hover {
     display: flex; 
     flex-direction: column; 
     flex-grow: 1; 
+    min-height: 280px; /* Adjusted to give more vertical space consistently */
 }
 .product-card h3 { 
     padding: 0; 
@@ -274,43 +281,126 @@ nav a:hover {
 }
 .product-card p { 
     padding: 0; 
-    flex-grow: 1; 
     color: var(--secondary-text-color); /* Lighter description text */
     font-size: 0.95rem;
     line-height: 1.5;
 }
-.product-rate { 
-    font-size: 1.6rem; /* Larger rate text */
-    font-weight: 700; 
-    color: var(--light-color); 
-    margin-bottom: 10px; 
+/* Style for links within description */
+.product-card p a {
+    color: var(--primary-color);
+    text-decoration: underline;
+    transition: color var(--transition-speed) ease;
 }
+.product-card p a:hover {
+    color: var(--primary-dark-variant);
+}
+
+
+/* --- New styles for expandable description --- */
+.product-description-wrapper {
+    max-height: 4.5em; /* Approximately 3 lines of text, adjust based on font-size and line-height */
+    overflow: hidden;
+    position: relative;
+    transition: max-height 0.4s ease-out, margin-bottom 0.4s ease-out; /* Smooth transition */
+    margin-bottom: 5px; /* Space before "Read More" button or next element */
+    flex-shrink: 0; /* Prevent description from shrinking excessively */
+}
+
+.product-description-wrapper.expanded {
+    max-height: 500px; /* A sufficiently large value for full expansion */
+    overflow: visible; /* Allows content to be fully seen */
+    margin-bottom: 10px; /* More space when expanded */
+}
+
+/* Gradient fade for truncated descriptions */
+.product-description-wrapper:not(.expanded)::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5em; /* Fading gradient height */
+    background: linear-gradient(to top, rgba(52, 58, 64, 1), rgba(52, 58, 64, 0)); /* Matches product card background */
+    pointer-events: none; /* Allows clicks to pass through */
+}
+
+/* Ensure no fade for short descriptions that don't truncate */
+.product-description-wrapper.no-truncate::after {
+    display: none;
+}
+
+.read-more-btn {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.95rem; 
+    font-weight: 500;
+    padding: 0;
+    margin-top: 5px; /* Space above button */
+    margin-bottom: 10px; /* IMPORTANT: Space below button, pushes next element down */
+    text-align: left;
+    transition: color var(--transition-speed) ease;
+    align-self: flex-start; /* Align button to the start */
+    flex-shrink: 0; /* Prevent button from shrinking */
+    z-index: 10; /* Ensure button is clickable over the fade */
+}
+
+.read-more-btn:hover {
+    color: var(--primary-dark-variant);
+    text-decoration: underline;
+}
+
+/* --- Category Badge, Product Rate, Warranty Styles --- */
 .category-badge { 
     display: inline-block; 
     background-color: var(--dark-color); 
     color: var(--secondary-text-color); 
-    padding: 6px 12px; /* Increased padding */
+    padding: 6px 12px; 
     border-radius: var(--border-radius-sm); 
     font-size: .85rem; 
-    margin-bottom: 15px; 
+    margin-top: 0; /* Managed by the preceding element's margin-bottom or flex distribution */
+    margin-bottom: 10px; /* Space below badge */
     font-weight: 500; 
+    align-self: flex-start; /* Align to start */
+    flex-shrink: 0;
 }
-.no-results { grid-column: 1 / -1; text-align: center; font-size: 1.3rem; padding: 40px; color: #a0a0a0; } /* Slightly larger and darker no results text */
+
+.product-rate { 
+    font-size: 1.6rem; 
+    font-weight: 700; 
+    color: var(--light-color); 
+    margin-top: 0; /* Managed by the preceding element's margin-bottom or flex distribution */
+    margin-bottom: 10px; /* Space below rate */
+    flex-shrink: 0;
+}
+
+.product-warranty {
+    font-size: 0.9rem;
+    color: var(--secondary-text-color);
+    margin-top: 0; /* Managed by the preceding element's margin-bottom or flex distribution */
+    margin-bottom: 15px; /* IMPORTANT: Space before quote controls */
+    font-weight: 400;
+    display: block; 
+    flex-shrink: 0;
+}
+
 
 /* --- Quote Estimation Controls & Summary --- */
 .quote-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px; /* Increased margin */
-    padding-top: 20px; /* Increased padding */
-    border-top: 1px solid rgba(255, 255, 255, 0.1); /* Slightly more visible border */
+    margin-top: auto; /* Pushes controls to the very bottom, creating space above */
+    padding-top: 20px; 
+    border-top: 1px solid rgba(255, 255, 255, 0.1); 
+    flex-shrink: 0;
 }
 
 .checkbox-container {
     display: block;
     position: relative;
-    padding-left: 35px; /* Increased padding for checkbox */
+    padding-left: 35px; 
     margin-bottom: 5px; 
     cursor: pointer;
     font-size: 1.05rem; 
@@ -336,11 +426,11 @@ nav a:hover {
     position: absolute;
     top: 0;
     left: 0;
-    height: 22px; /* Slightly larger checkbox */
+    height: 22px; 
     width: 22px; 
     background-color: var(--dark-color);
     border: 2px solid var(--primary-color);
-    border-radius: 5px; /* Slightly rounded corners */
+    border-radius: 5px; 
     transition: all var(--transition-speed) ease;
 }
 
@@ -369,11 +459,11 @@ nav a:hover {
 
 /* Style the checkmark */
 .checkbox-container .checkmark:after {
-    left: 7px; /* Adjust checkmark position */
+    left: 7px; 
     top: 3px;
-    width: 6px; /* Adjust checkmark size */
+    width: 6px; 
     height: 12px;
-    border: solid var(--dark-color); /* Dark checkmark on yellow background */
+    border: solid var(--dark-color); 
     border-width: 0 3px 3px 0;
     -webkit-transform: rotate(45deg);
     -ms-transform: rotate(45deg);
@@ -383,7 +473,7 @@ nav a:hover {
 .quantity-control {
     display: flex;
     align-items: center;
-    gap: 12px; /* Increased gap */
+    gap: 12px; 
 }
 
 .quantity-control label {
@@ -393,8 +483,8 @@ nav a:hover {
 }
 
 .product-quantity-input {
-    width: 70px; /* Wider input */
-    padding: 10px 12px; /* Increased padding */
+    width: 70px; 
+    padding: 10px 12px; 
     border-radius: var(--border-radius-sm); 
     border: 1px solid #555;
     background-color: var(--dark-color);
@@ -417,8 +507,8 @@ nav a:hover {
 }
 
 .item-total {
-    margin-top: 20px; /* Increased margin */
-    font-size: 1.3rem; /* Larger item total */
+    margin-top: 20px; 
+    font-size: 1.3rem; 
     font-weight: 700;
     color: var(--primary-color);
     text-align: right;
@@ -428,32 +518,32 @@ nav a:hover {
 #quote-summary {
     background: var(--medium-dark-color);
     border-radius: var(--border-radius-md); 
-    box-shadow: var(--box-shadow-heavy); /* Stronger shadow for summary */
-    padding: 40px; /* Increased padding */
-    margin-top: 80px; /* Increased margin */
+    box-shadow: var(--box-shadow-heavy); 
+    padding: 40px; 
+    margin-top: 80px; 
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.15); /* Stronger border */
+    border: 1px solid rgba(255, 255, 255, 0.15); 
     width: 100%; 
 }
 
 #quote-summary h3 {
-    font-size: 2.5rem; /* Larger summary heading */
+    font-size: 2.5rem; 
     margin-bottom: 30px; 
     color: var(--light-color);
 }
 
 #total-amount {
-    font-size: 3rem; /* Larger total amount */
+    font-size: 3rem; 
     font-weight: 700;
     color: var(--primary-color);
     margin-bottom: 40px; 
-    text-shadow: 0 0 15px rgba(255, 193, 7, 0.6); /* More prominent shadow */
+    text-shadow: 0 0 15px rgba(255, 193, 7, 0.6); 
 }
 
 #quote-summary .cta-button {
-    margin: 15px; /* Increased button margin */
-    padding: 18px 40px; /* Larger buttons */
-    font-size: 1.1rem; /* Larger button text */
+    margin: 15px; 
+    padding: 18px 40px; 
+    font-size: 1.1rem; 
 }
 
 .print-button {
@@ -462,7 +552,7 @@ nav a:hover {
     border: 2px solid var(--primary-color);
 }
 .print-button:hover {
-    background-color: var(--primary-dark-variant); /* Darker yellow on hover */
+    background-color: var(--primary-dark-variant); 
     color: var(--dark-color);
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
@@ -484,7 +574,7 @@ nav a:hover {
 footer { 
     background: #1c2024; 
     text-align: center; 
-    padding: 2.5rem 0; /* Increased padding */
+    padding: 2.5rem 0; 
     border-top: 1px solid rgba(255,255,255,0.15); 
     width: 100%;
 }
@@ -495,27 +585,27 @@ footer p {
 }
 .social-links a { 
     color: var(--text-color); 
-    margin: 0 18px; /* Increased margin */
-    font-size: 1.6rem; /* Larger icons */
+    margin: 0 18px; 
+    font-size: 1.6rem; 
     transition: color var(--transition-speed) ease, transform var(--transition-speed) ease; 
 }
 .social-links a:hover { 
     color: var(--primary-color); 
-    transform: translateY(-8px) scale(1.1); /* More pronounced hover effect */
+    transform: translateY(-8px) scale(1.1); 
 }
 
 .contact-info {
-    margin-top: 25px; /* Increased margin */
+    margin-top: 25px; 
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap; 
-    gap: 35px; /* Increased gap */
+    gap: 35px; 
 }
 .contact-info a {
-    color: var(--light-color); /* Lighter text for contact info */
+    color: var(--light-color); 
     text-decoration: none;
-    font-size: 1.15rem; /* Larger font */
+    font-size: 1.15rem; 
     font-family: var(--font-body);
     transition: color var(--transition-speed) ease;
 }
@@ -523,9 +613,9 @@ footer p {
     color: var(--primary-color);
 }
 .contact-info i {
-    margin-right: 10px; /* Increased margin */
+    margin-right: 10px; 
     color: var(--primary-color); 
-    font-size: 1.25rem; /* Larger icon */
+    font-size: 1.25rem; 
 }
 
 /* Added footer navigation styles */
@@ -533,7 +623,7 @@ footer p {
     margin-top: 30px;
     display: flex;
     justify-content: center;
-    gap: 25px; /* Space out the links */
+    gap: 25px; 
     flex-wrap: wrap;
 }
 
@@ -551,19 +641,19 @@ footer p {
 
 /* Styles for general content pages (About Us, Contact Us, Privacy Policy, Terms) */
 .page-content {
-    padding-top: 120px; /* Adjust for fixed header */
+    padding-top: 120px; 
     padding-bottom: 80px;
-    min-height: calc(100vh - 80px); /* Ensure some height even with minimal content, accounting for header/footer */
-    background-color: var(--dark-color); /* Consistent background */
+    min-height: calc(100vh - 80px); 
+    background-color: var(--dark-color); 
     color: var(--text-color);
-    display: none; /* Hidden by default */
-    align-items: center; /* Center content horizontally within the section */
-    justify-content: flex-start; /* Align content to top */
+    display: none; 
+    align-items: center; 
+    justify-content: flex-start; 
 }
 
 .page-content.active-page-content {
-    display: flex; /* Show active section, using flex for internal centering if needed */
-    flex-direction: column; /* Ensure content stacks */
+    display: flex; 
+    flex-direction: column; 
 }
 
 
@@ -572,20 +662,20 @@ footer p {
     padding: 40px;
     border-radius: var(--border-radius-md);
     box-shadow: var(--box-shadow-light);
-    text-align: left; /* Content should align left */
-    width: 100%; /* Take full width of parent */
-    max-width: 900px; /* Limit content width for readability */
+    text-align: left; 
+    width: 100%; 
+    max-width: 900px; 
 }
 
 .page-content h2 {
-    text-align: left; /* Override center alignment for h2 */
+    text-align: left; 
     margin-left: 0;
     margin-right: 0;
     font-size: 2.2rem;
-    color: var(--primary-color); /* Main headings on content pages */
+    color: var(--primary-color); 
 }
 .page-content h2::after {
-    left: 0; /* Align underline to left */
+    left: 0; 
     transform: translateX(0);
 }
 .page-content h3 {
@@ -642,7 +732,7 @@ footer p {
 .contact-item i {
     color: var(--primary-color);
     font-size: 1.3rem;
-    min-width: 25px; /* Ensure icon doesn't shift text */
+    min-width: 25px; 
     text-align: center;
 }
 
@@ -658,7 +748,7 @@ footer p {
 
 
 /* --- Scroll & Load Animations --- */
-.fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; } /* Slower, longer animation */
+.fade-in { opacity: 0; transform: translateY(40px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; } 
 .fade-in.visible { opacity: 1; transform: translateY(0); }
 
 /* --- Responsive Design --- */
@@ -666,11 +756,11 @@ footer p {
     #estimator-section h1 { font-size: 3.5rem; }
     #estimator-section h2 { font-size: 2.2rem; }
     #estimator-section p { font-size: 1.25rem; }
-    .product-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } /* Adjust grid for smaller screens */
+    .product-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); } 
     #quote-summary h3 { font-size: 2rem; }
     #total-amount { font-size: 2.5rem; }
 
-    .page-content { padding-top: 100px; } /* Adjust for header on other pages */
+    .page-content { padding-top: 100px; } 
     .page-content h2 { font-size: 2rem; }
     .page-content h3 { font-size: 1.4rem; }
     .page-content p, .page-content ul li, .page-content ol li { font-size: 1rem; }
@@ -712,7 +802,7 @@ footer p {
     .product-card p { font-size: 0.95rem; }
     .product-rate { font-size: 1.4rem; }
     .category-badge { padding: 5px 10px; font-size: 0.8rem; }
-    .quote-controls { flex-direction: column; align-items: flex-start; gap: 15px; margin-top: 15px; padding-top: 15px; }
+    .quote-controls { flex-direction: column; align-items: flex-start; gap: 15px; margin-top: auto; padding-top: 15px; } 
     .quantity-control { width: 100%; justify-content: flex-start; }
     .product-quantity-input { flex-grow: 1; max-width: 90px; }
     .item-total { text-align: left; font-size: 1.1rem; margin-top: 10px; }
@@ -730,6 +820,12 @@ footer p {
     .page-content h2 { font-size: 1.8rem; }
     .page-content h3 { font-size: 1.3rem; }
     .page-content p, .page-content ul li, .page-content ol li { font-size: 0.95rem; }
+    .contact-item { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .contact-item i { min-width: auto; margin-right: 0; }
+
+    .product-description-wrapper { max-height: 4em; margin-bottom: 5px; } 
+    .read-more-btn { font-size: 0.85rem; margin-top: 5px; margin-bottom: 8px; } 
+    .product-warranty { margin-top: 8px; margin-bottom: 12px; } 
 }
 
 @media (max-width: 480px) {
@@ -766,6 +862,10 @@ footer p {
     .page-content p, .page-content ul li, .page-content ol li { font-size: 0.9rem; }
     .contact-item { flex-direction: column; align-items: flex-start; gap: 8px; }
     .contact-item i { min-width: auto; margin-right: 0; }
+
+    .product-description-wrapper { max-height: 4em; margin-bottom: 5px; } 
+    .read-more-btn { font-size: 0.85rem; margin-top: 5px; margin-bottom: 8px; } 
+    .product-warranty { margin-top: 8px; margin-bottom: 12px; } 
 }
 
 /* Print specific styles for the generated quote window (no change here, as it's for a popup) */
@@ -851,5 +951,199 @@ footer p {
     }
     .contact-item a {
         color: #333 !important;
+    }
+}
+
+
+/* --- Product Modal Specific Styles --- */
+#product-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001; /* Above everything else */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#product-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#product-modal-content {
+    background-color: var(--medium-dark-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-heavy);
+    width: 90%;
+    max-width: 800px; /* Max width for the modal */
+    position: relative;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh; /* Max height to allow scrolling */
+    overflow-y: auto; /* Enable scrolling for content */
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+#product-modal-overlay.visible #product-modal-content {
+    transform: translateY(0);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    transition: color var(--transition-speed) ease;
+    z-index: 10; /* Ensure it's clickable */
+}
+
+.modal-close-btn:hover {
+    color: var(--primary-color);
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column; /* Stack image and details vertically on smaller screens */
+    gap: 25px; /* Spacing between image and details */
+    align-items: center; /* Center content horizontally initially */
+}
+
+#modal-product-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--border-radius-sm);
+    flex-shrink: 0; /* Prevent image from shrinking */
+    object-fit: contain; /* Ensure image fits without cropping */
+    max-height: 350px; /* Limit image height */
+}
+
+.modal-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Align text content to the left */
+    width: 100%; /* Take full width */
+}
+
+#modal-product-name {
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center; /* Center name */
+    width: 100%;
+}
+
+#modal-product-description {
+    font-size: 1.1rem;
+    color: var(--text-color);
+    margin-bottom: 20px;
+    line-height: 1.7;
+    white-space: pre-wrap; /* Preserves formatting and line breaks */
+    word-wrap: break-word; /* Breaks long words */
+    max-height: unset; /* Remove max-height for modal description */
+    overflow: visible; /* Ensure full description is visible */
+    /* Remove any fade effect from the modal description */
+}
+#modal-product-description::after {
+    display: none !important; 
+}
+/* Style links within the modal description */
+#modal-product-description a {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+#modal-product-description a:hover {
+    color: var(--primary-dark-variant);
+}
+
+
+#modal-product-test {
+    font-size: 1rem;
+    color: var(--secondary-text-color);
+    margin-top: 10px;
+    margin-bottom: 25px;
+    padding: 10px 15px;
+    background-color: var(--dark-color);
+    border-radius: var(--border-radius-sm);
+    width: 100%;
+    text-align: left;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+#modal-quote-controls {
+    width: 100%;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 0; /* Ensures it flows correctly after previous elements */
+}
+#modal-quote-controls .checkbox-container {
+    margin-bottom: 0; /* Remove extra margin for modal controls */
+}
+
+/* Specific styles for modal's checkbox and quantity input to override generic ones if needed */
+.product-select-checkbox-modal + .checkmark { /* Targeting the custom checkbox for modal */
+    /* Adjust if you want different size/style in modal */
+}
+.product-quantity-input-modal {
+    /* Adjust if you want different size/style in modal */
+}
+
+
+/* Responsive adjustments for modal */
+@media (min-width: 768px) {
+    .modal-body {
+        flex-direction: row; /* Side-by-side on larger screens */
+        align-items: flex-start; /* Align top */
+    }
+    #modal-product-image {
+        max-width: 40%; /* Image takes up less width */
+        max-height: none; /* Allow more height */
+    }
+    .modal-details {
+        flex-grow: 1; /* Details take remaining space */
+        align-items: flex-start; /* Ensure left alignment */
+        text-align: left;
+    }
+    #modal-product-name {
+        text-align: left; /* Align name left on larger screens */
+    }
+}
+
+@media (max-width: 480px) {
+    #product-modal-content {
+        padding: 20px;
+    }
+    .modal-close-btn {
+        font-size: 1.5rem;
+        top: 10px;
+        right: 10px;
+    }
+    #modal-product-name {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+    }
+    #modal-product-description {
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+    #modal-product-test {
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    #modal-quote-controls {
+        padding-top: 15px;
     }
 }

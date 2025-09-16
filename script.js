@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const productDataURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTH-7zq9uBbhmgXFAjr1zYskABxAeXBZWjBYRKswuvbRyhdxx3D8Z0I9VB7FyFFPtf3QUZ8aYh0mw-G/pub?output=csv';
 
     // Google Form Link for "Contact for Final Quote" button (no pre-filling for this button)
-    const GOOGLE_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6WsJ2WwG1Sf-zGlztKWA1V-vpg/viewform';
+    const GOOGLE_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6Ws2WwG1Sf-zGlztKWA1V-vpg/viewform';
 
 
     // Get references to HTML elements
@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalProductName = document.getElementById('modal-product-name');
     const modalProductDescription = document.getElementById('modal-product-description');
     const modalProductTest = document.getElementById('modal-product-test');
+    const modalProductNote = document.getElementById('modal-product-note'); // Reference for the new note element
     const modalQuoteControls = document.getElementById('modal-quote-controls');
     const modalSelectCheckbox = modalQuoteControls.querySelector('.product-select-checkbox-modal');
     const modalQuantityInput = modalQuoteControls.querySelector('.product-quantity-input-modal');
@@ -78,10 +79,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     quotableProducts = results.data.filter(p => p.name && p.name.trim() !== "" && typeof p.rate === 'number' && p.rate > 0);
                     quotableProducts.forEach((p, index) => {
                         if (!p.id) p.id = `product-${index}`;
-                        // Ensure a default for warranty, description, and test if not present in data
+                        // Ensure a default for warranty, description, test, and text if not present in data
                         if (typeof p.warranty === 'undefined') p.warranty = ''; 
                         if (typeof p.description === 'undefined') p.description = '';
                         if (typeof p.Test === 'undefined') p.Test = ''; // Ensure 'Test' field is initialized
+                        if (typeof p.text === 'undefined') p.text = ''; // Ensure 'text' field is initialized for notes
                     });
 
                     if (quotableProducts.length === 0) {
@@ -123,7 +125,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Determine if description is long enough to be truncated (e.g., > 100 characters)
             const isDescriptionLong = (product.description && product.description.length > 100); 
             const warrantyHtml = product.warranty ? `<div class="product-warranty">Warranty: ${product.warranty}</div>` : '';
-
+            const noteHtml = product.text ? `<div class="product-note">${linkify(product.text)}</div>` : ''; // New: HTML for the 'text' note
+            
             const productCard = `
                 <div class="product-card quote-item fade-in" data-product-id="${product.id}" data-product-rate="${product.rate}">
                     <img src="${product.image}" alt="${product.name}">
@@ -136,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <span class="category-badge">${product.subCategory || 'General'}</span>
                         <div class="product-rate">Rate: ₹${product.rate.toFixed(2)}</div>
                         ${warrantyHtml}
+                        ${noteHtml} <!-- Insert the note HTML here -->
                         
                         <div class="quote-controls">
                             <label class="checkbox-container">
@@ -320,6 +324,12 @@ document.addEventListener('DOMContentLoaded', function() {
         modalProductName.textContent = product.name;
         modalProductDescription.innerHTML = linkify(product.description || 'No description available.');
         modalProductTest.textContent = `Test: ${product.Test || 'N/A'}`; // Display the 'Test' column value
+        
+        // Update modal's 'text' field
+        if (modalProductNote) {
+            modalProductNote.innerHTML = product.text ? `<span class="product-note-modal-label">Note:</span> ${linkify(product.text)}` : '';
+            modalProductNote.style.display = product.text ? 'block' : 'none'; // Show/hide based on content
+        }
 
         // Update modal's "Select" and "Qty" based on current selection in the main grid
         if (selectedProducts[productId]) {

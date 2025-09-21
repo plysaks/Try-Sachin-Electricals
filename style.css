@@ -582,6 +582,20 @@ nav a:hover {
     box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
 }
 
+/* NEW: Place Order button style */
+.order-button {
+    background-color: transparent;
+    color: var(--light-color); /* Light text color */
+    border: 2px solid var(--light-color); /* Light border */
+}
+.order-button:hover {
+    background-color: var(--light-color); /* Fills with light color */
+    color: var(--dark-color); /* Dark text on hover */
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2); /* Light shadow */
+}
+
+
 .contact-button {
     background-color: transparent;
     color: var(--primary-color);
@@ -854,6 +868,21 @@ footer p {
     .read-more-btn { font-size: 0.85rem; margin-top: 5px; margin-bottom: 8px; } 
     .product-warranty { margin-top: 8px; margin-bottom: 12px; } 
     .product-note { font-size: 0.85em; margin-top: 8px; margin-bottom: 12px; padding: 6px 8px; } /* Responsive note style */
+
+    /* Order form responsive adjustments */
+    #order-form-modal-content {
+        padding: 20px;
+    }
+    #order-form h3 {
+        font-size: 1.8rem;
+    }
+    .form-group label {
+        font-size: 0.95rem;
+    }
+    .form-group input {
+        padding: 10px;
+        font-size: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -895,6 +924,18 @@ footer p {
     .read-more-btn { font-size: 0.85rem; margin-top: 5px; margin-bottom: 8px; } 
     .product-warranty { margin-top: 8px; margin-bottom: 12px; } 
     .product-note { font-size: 0.85em; margin-top: 8px; margin-bottom: 12px; padding: 6px 8px; } /* Responsive note style */
+
+    /* Order form responsive adjustments */
+    #order-form h3 {
+        font-size: 1.6rem;
+    }
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    .form-group input {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
 }
 
 /* Print specific styles for the generated quote window (no change here, as it's for a popup) */
@@ -904,7 +945,8 @@ footer p {
         color: #000 !important;
     }
     header, footer, .hamburger, #estimator-section .cta-button, .search-container, .product-filters, .quote-controls,
-    .page-content:not(.active-page-content) /* Hide all non-active content sections */
+    .page-content:not(.active-page-content), /* Hide all non-active content sections */
+    #order-form-modal-overlay /* Hide order form modal */
     { 
         display: none !important;
     }
@@ -1213,4 +1255,112 @@ footer p {
     #modal-quote-controls {
         padding-top: 15px;
     }
+}
+
+/* NEW: Styles for the Order Form Modal */
+#order-form-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Darker overlay for order form */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1002; /* Higher than product modal */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#order-form-modal-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+#order-form-modal-content {
+    background-color: var(--medium-dark-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-heavy);
+    width: 90%;
+    max-width: 550px; /* Max width for the order form */
+    position: relative;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+#order-form-modal-overlay.visible #order-form-modal-content {
+    transform: translateY(0);
+}
+
+#order-form-modal-content h3 {
+    text-align: center;
+    font-size: 2.2rem;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+#order-form-modal-content p {
+    text-align: center;
+    color: var(--secondary-text-color);
+    margin-bottom: 25px;
+}
+
+#order-form .form-group {
+    margin-bottom: 20px;
+}
+
+#order-form .form-group label {
+    display: block;
+    font-size: 1.05rem;
+    color: var(--light-color);
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+#order-form .form-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid #555;
+    background-color: var(--dark-color);
+    color: var(--light-color);
+    font-size: 1.05rem;
+    transition: all var(--transition-speed) ease;
+}
+
+#order-form .form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+}
+
+#order-form .cta-button {
+    width: 100%;
+    margin-top: 20px;
+    background-color: var(--primary-color);
+    color: var(--dark-color);
+    border: 2px solid var(--primary-color);
+    padding: 15px 25px;
+    font-size: 1.1rem;
+}
+
+#order-form .cta-button:hover {
+    background-color: var(--primary-dark-variant);
+    box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+    transform: translateY(-3px);
+}
+
+.form-note {
+    font-size: 0.85rem;
+    color: var(--secondary-text-color);
+    margin-top: 20px;
+    text-align: center;
+    line-height: 1.4;
 }

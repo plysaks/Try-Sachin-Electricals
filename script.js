@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Google Form Link for "Contact for Final Quote" button (no pre-filling for this button)
     const GOOGLE_FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSelUepZx0GFxx4wUnQG6xXJ6Ws2WwG1Sf-zGlztKWA1V-vpg/viewform';
 
+    // Company Email for "Place Order" functionality
+    // This is your company's email address where the order details will be sent.
+    const COMPANY_EMAIL = 'playersachin@yahoo.co.in';
+
 
     // Get references to HTML elements
     const quoteProductGrid = document.getElementById('quote-product-grid'); 
@@ -22,8 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalAmountDisplay = document.getElementById('total-amount');
     const printQuoteButton = document.getElementById('print-quote');
     const contactForQuoteButton = document.getElementById('contact-for-quote-button');
+    const placeOrderButton = document.getElementById('place-order-button'); // NEW
 
-    // Modal elements
+    // Product Modal elements
     const productModalOverlay = document.getElementById('product-modal-overlay');
     const productModalContent = document.getElementById('product-modal-content');
     const modalCloseBtn = document.getElementById('modal-close-btn');
@@ -35,6 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalQuoteControls = document.getElementById('modal-quote-controls');
     const modalSelectCheckbox = modalQuoteControls.querySelector('.product-select-checkbox-modal');
     const modalQuantityInput = modalQuoteControls.querySelector('.product-quantity-input-modal');
+
+    // Order Form Modal elements (NEW)
+    const orderFormModalOverlay = document.getElementById('order-form-modal-overlay');
+    const orderModalCloseBtn = document.getElementById('order-modal-close-btn');
+    const orderForm = document.getElementById('order-form');
+    const orderNameInput = document.getElementById('order-name');
+    const orderNumberInput = document.getElementById('order-number');
+    const orderEmailInput = document.getElementById('order-email');
 
 
     // Shared elements
@@ -229,8 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function updateTotalAmount() {
-        if (!totalAmountDisplay) return;
+    function getTotalAmount() {
         let grandTotal = 0;
         for (const id in selectedProducts) {
             const item = selectedProducts[id];
@@ -238,6 +250,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 grandTotal += (item.rate * item.quantity);
             }
         }
+        return grandTotal;
+    }
+
+    function updateTotalAmount() {
+        if (!totalAmountDisplay) return;
+        const grandTotal = getTotalAmount();
         totalAmountDisplay.textContent = `Total Estimated Amount: ₹${grandTotal.toFixed(2)}`;
     }
 
@@ -306,7 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ====================================================================================
-    // MODAL FUNCTIONS
+    // MODAL FUNCTIONS (Product View & Order Form)
     // ====================================================================================
     let currentModalProductId = null; // To keep track of the product in the modal
 
@@ -404,6 +422,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if (mainGridCard) updateIndividualItemTotal(mainGridCard);
     }
 
+    // NEW: Functions for Order Form Modal
+    function openOrderFormModal() {
+        if (Object.keys(selectedProducts).length === 0) {
+            alert("Please select some products for your order before proceeding.");
+            return;
+        }
+        orderFormModalOverlay.classList.add('visible');
+        document.body.classList.add('modal-open');
+        orderNameInput.focus(); // Focus on the first input field
+    }
+
+    function closeOrderFormModal() {
+        orderFormModalOverlay.classList.remove('visible');
+        document.body.classList.remove('modal-open');
+        orderForm.reset(); // Clear form fields
+    }
 
     // ====================================================================================
     // 6. EVENT LISTENERS
@@ -474,12 +508,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // IMPORTANT: No single-click listener on product card for expansion/selection here.
         // Dblclick listener is attached dynamically in displayProductsForQuote for modal.
 
-        // Modal Close Button Listener
+        // Product Modal Close Button Listener
         if (modalCloseBtn) {
             modalCloseBtn.addEventListener('click', closeProductModal);
         }
 
-        // Close modal when clicking outside content
+        // Close product modal when clicking outside content
         if (productModalOverlay) {
             productModalOverlay.addEventListener('click', (e) => {
                 if (e.target === productModalOverlay) {
@@ -488,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Listen for ESC key to close modal
+        // Listen for ESC key to close product modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && productModalOverlay.classList.contains('visible')) {
                 closeProductModal();
@@ -619,6 +653,87 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.open(GOOGLE_FORM_BASE_URL, '_blank');
             });
         }
+
+        // NEW: Place Order Button Listener
+        if (placeOrderButton) {
+            placeOrderButton.addEventListener('click', openOrderFormModal);
+        }
+
+        // NEW: Order Form Modal Close Button Listener
+        if (orderModalCloseBtn) {
+            orderModalCloseBtn.addEventListener('click', closeOrderFormModal);
+        }
+
+        // NEW: Close order form modal when clicking outside content
+        if (orderFormModalOverlay) {
+            orderFormModalOverlay.addEventListener('click', (e) => {
+                if (e.target === orderFormModalOverlay) {
+                    closeOrderFormModal();
+                }
+            });
+        }
+
+        // NEW: Listen for ESC key to close order form modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && orderFormModalOverlay.classList.contains('visible')) {
+                closeOrderFormModal();
+            }
+        });
+
+        // NEW: Order Form Submission Listener - MODIFIED TO REDIRECT TO GMAIL
+        if (orderForm) {
+            orderForm.addEventListener('submit', (e) => {
+                e.preventDefault(); // Prevent default form submission
+
+                const customerName = orderNameInput.value.trim();
+                const customerNumber = orderNumberInput.value.trim();
+                const customerEmail = orderEmailInput.value.trim();
+
+                if (!customerName || !customerNumber || !customerEmail) {
+                    alert('Please fill in all contact details.');
+                    return;
+                }
+
+                let emailSubject = `Order Request from ${customerName} (${customerNumber}) - SACHIN ELECTRICALS`;
+                let emailBody = `Dear SACHIN ELECTRICALS Team,\n\n`;
+                emailBody += `I would like to place an order based on the following estimation from your website.\n\n`;
+                emailBody += `--- Customer Details ---\n`;
+                emailBody += `Name: ${customerName}\n`;
+                emailBody += `Phone: ${customerNumber}\n`;
+                emailBody += `Email: ${customerEmail}\n\n`;
+                emailBody += `--- Order Details ---\n`;
+
+                let grandTotal = 0;
+                if (Object.keys(selectedProducts).length === 0) {
+                    emailBody += `No products were selected for this order.\n\n`;
+                } else {
+                    Object.values(selectedProducts).forEach(item => {
+                        const itemTotal = (item.rate * item.quantity);
+                        grandTotal += itemTotal;
+                        emailBody += `- ${item.name} (Qty: ${item.quantity}, Rate: ₹${item.rate.toFixed(2)}) = ₹${itemTotal.toFixed(2)}\n`;
+                    });
+                    emailBody += `\nTotal Estimated Amount: ₹${grandTotal.toFixed(2)}\n`;
+                    emailBody += `GST Extra as per applicable\n\n`;
+                }
+
+                emailBody += `Please confirm the final quote and arrange for the order.\n\n`;
+                emailBody += `Thank you,\n${customerName}`;
+
+                // Construct Gmail compose URL
+                // view=cm: compose mail
+                // fs=1: full screen
+                // to: recipient email
+                // su: subject
+                // body: email body
+                const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(COMPANY_EMAIL)}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+                
+                // Open Gmail compose page in a new tab
+                window.open(gmailComposeUrl, '_blank');
+
+                closeOrderFormModal(); // Close the form modal after generating the email
+            });
+        }
+
 
         // Shared Hamburger Menu Listener
         if (hamburgerMenu && navUl) {
